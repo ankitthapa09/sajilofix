@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sajilo FIx"),
-        backgroundColor: Colors.blueAccent,
+        //title: const Text("Sajilo FIx"),
+        //backgroundColor: Colors.blueAccent,
       ),
-      body: SafeArea(child: Column(children: [
-
-        ],
-      )),
+      backgroundColor: Color(0xFFF9F9F9),
+      body: SafeArea(
+        child: Center(
+          child: Image.asset(
+            "assets/images/sajilofix_logo.png",
+            width: 400,
+            height: 400,
+          ),
+        ),
+      ),
     );
   }
 }
