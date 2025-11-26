@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/screens/login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -49,10 +50,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter password";
+                    return "Please enter email";
                   }
-                  if (value.length < 6) {
-                    return "Password must be at least 6 characters";
+                  if (!value.contains("@")) {
+                    return "Enter a valid email";
                   }
                   return null;
                 },
@@ -78,9 +79,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                   ),
                 ),
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter email";
+                    return "Please enter password!";
+                  }
+                  if (value.length < 6) {
+                    return "Password must be at least 6 characters";
                   }
                   return null;
                 },
@@ -133,10 +138,37 @@ class _SignupScreenState extends State<SignupScreen> {
                           content: Text("Account Created Successfully"),
                         ),
                       );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     }
                   },
                   child: Text("Create Account", style: TextStyle(fontSize: 18)),
                 ),
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already Have an Account  "),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/splash_screen.dart';
+import 'package:sajilofix/screens/splash_screen.dart';
 
 class SajiloFix extends StatelessWidget {
   const SajiloFix({super.key});
