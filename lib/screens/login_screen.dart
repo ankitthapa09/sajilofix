@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/screens/forgetPassword_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -87,7 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ForgetpasswordScreen(),
+                        ),
+                      );
+                    },
                     child: const Text(
                       "Forget Password?",
                       style: TextStyle(
