@@ -15,21 +15,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      //appBar: AppBar(),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsetsGeometry.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Skip',
-                    style: TextStyle(color: Color(0xFF2449DE), fontSize: 16),
+            Container(
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: 9,
+                vertical: 20,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset("assets/images/sajilofix_logo.png", height: 100),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(color: Color(0xFF2449DE), fontSize: 16),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
 
@@ -91,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
