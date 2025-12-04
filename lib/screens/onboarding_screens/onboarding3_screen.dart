@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/onboarding_screens/onboarding3_screen.dart';
+import 'package:sajilofix/screens/signup_screen.dart';
 
-class Onboarding2Screen extends StatelessWidget {
-  const Onboarding2Screen({super.key});
+class Onboarding3Screen extends StatelessWidget {
+  const Onboarding3Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,19 +39,19 @@ class Onboarding2Screen extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Container(
-                    width: 30,
+                    width: 8,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Color(0xFF2449DE),
+                      color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Container(
-                    width: 8,
+                    width: 30,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: Color(0xFF2449DE),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -68,7 +68,7 @@ class Onboarding2Screen extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.location_on,
+                  Icons.notifications_active,
                   size: 60,
                   color: Colors.blue.shade600,
                 ),
@@ -77,7 +77,7 @@ class Onboarding2Screen extends StatelessWidget {
               const SizedBox(height: 40),
 
               const Text(
-                'Track Your Reports',
+                'Stay Updated',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -88,7 +88,7 @@ class Onboarding2Screen extends StatelessWidget {
               const SizedBox(height: 16),
 
               const Text(
-                'Monitor progress from submission to\nresolution in real-time',
+                'Get instant notifications when your\nreports are reviewed or resolved',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
               ),
@@ -102,9 +102,7 @@ class Onboarding2Screen extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => Onboarding3Screen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => SignupScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -114,20 +112,13 @@ class Onboarding2Screen extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                    ],
+                  child: const Text(
+                    'Get Started',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
