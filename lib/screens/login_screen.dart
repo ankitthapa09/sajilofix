@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/screens/forgetPassword_screen.dart';
+import 'package:sajilofix/screens/citizen_dashboard.dart';
+import 'package:sajilofix/screens/forget_password/forgetPassword_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -127,7 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => CitizenDashboard(),
+                        ),
                       );
                     }
                   },
