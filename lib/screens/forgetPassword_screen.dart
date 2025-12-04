@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/screens/getCode_screen.dart';
 
 class ForgetpasswordScreen extends StatefulWidget {
@@ -89,8 +90,9 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
                     if (_formkey.currentState!.validate()) {
                       _getCodeEmailController.clear();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Code sent to mail")),
+                      showMySnackBar(
+                        context: context,
+                        message: "Code sent to your gmail.",
                       );
 
                       Navigator.push(

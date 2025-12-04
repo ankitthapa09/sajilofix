@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/common/sajiloFix_snackbar.dart';
 import 'package:sajilofix/screens/forgetPassword_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
 
@@ -120,8 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       _loginEmailController.clear();
                       _loginPassController.clear();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Login Sucessfull!")),
+                      showMySnackBar(
+                        context: context,
+                        message: "Login Sucessfull!",
                       );
                       Navigator.pushReplacement(
                         context,
