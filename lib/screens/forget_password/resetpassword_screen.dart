@@ -43,7 +43,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      backgroundColor: const Color(0xFFF9F9F9),
+      // backgroundColor: const Color(0xFFF9F9F9),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
         child: Form(
@@ -127,7 +127,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                   child: const Text(
                     "Reset Password",
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

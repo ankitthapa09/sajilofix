@@ -16,8 +16,8 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Color(0xFFF9F9F9)),
-      backgroundColor: Color(0xFFF9F9F9),
+      appBar: AppBar(),
+      //backgroundColor: Color(0xFFF9F9F9),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
         child: Form(

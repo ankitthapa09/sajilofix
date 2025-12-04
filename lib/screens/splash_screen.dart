@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
         //title: const Text("Sajilo FIx"),
         //backgroundColor: Colors.blueAccent,
       ),
-      backgroundColor: Color(0xFFF9F9F9),
+      // backgroundColor: Color(0xFFF9F9F9),
       body: SafeArea(
         child: Center(
           child: Image.asset(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/common/sajiloFix_snackbar.dart';
 import 'package:sajilofix/screens/login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      backgroundColor: Color(0xFFF9F9F9),
+      //backgroundColor: Color(0xFFF9F9F9),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 20),
         child: Form(
@@ -37,7 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(fontSize: 34.0, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -121,22 +122,24 @@ class _SignupScreenState extends State<SignupScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ButtonStyle(),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Color(0xFF2449DE),
+                  ),
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
                       _emailController.clear();
                       _passController.clear();
                       _confirmPassController.clear();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Account Created Successfully"),
-                        ),
+                      showMySnackBar(
+                        context: context,
+                        message: "Account Created Successfully",
                       );
 
                       Navigator.pushReplacement(
@@ -145,17 +148,24 @@ class _SignupScreenState extends State<SignupScreen> {
                       );
                     }
                   },
-                  child: Text("Create Account", style: TextStyle(fontSize: 18)),
+                  child: Text(
+                    "Create Account",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Already Have an Account  "),
                   InkWell(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
                       );

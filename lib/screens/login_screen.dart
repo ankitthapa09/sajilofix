@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         child: Form(
           key: _formkey,
           child: Column(
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text("Create an Account  "),
                   InkWell(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => SignupScreen()),
                       );
