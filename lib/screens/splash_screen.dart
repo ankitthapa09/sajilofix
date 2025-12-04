@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sajilofix/screens/onboarding_screens/onboarding1_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 3),
       () => Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const SignupScreen()),
+        MaterialPageRoute(builder: (context) => const Onboarding1Screen()),
       ),
     );
   }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/onboarding_screens/onboarding2_screen.dart';
-import 'package:sajilofix/screens/signup_screen.dart';
 
-class Onboarding1Screen extends StatelessWidget {
-  const Onboarding1Screen({super.key});
+class Onboarding2Screen extends StatelessWidget {
+  const Onboarding2Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +15,7 @@ class Onboarding1Screen extends StatelessWidget {
               Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignupScreen()),
-                    );
-                  },
+                  onPressed: () {},
                   child: const Text(
                     'Skip',
                     style: TextStyle(color: Color(0xFF2449DE), fontSize: 16),
@@ -36,28 +29,19 @@ class Onboarding1Screen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
+                    width: 8,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
                     width: 30,
                     height: 4,
                     decoration: BoxDecoration(
                       color: Color(0xFF2449DE),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 8,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 8,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -74,7 +58,7 @@ class Onboarding1Screen extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.camera_alt,
+                  Icons.location_on,
                   size: 60,
                   color: Colors.blue.shade600,
                 ),
@@ -83,7 +67,7 @@ class Onboarding1Screen extends StatelessWidget {
               const SizedBox(height: 40),
 
               const Text(
-                'Report Issues Easily',
+                'Track Your Reports',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -94,7 +78,7 @@ class Onboarding1Screen extends StatelessWidget {
               const SizedBox(height: 16),
 
               const Text(
-                'Spot a problem? Snap a photo and report\nit in seconds',
+                'Monitor progress from submission to\nresolution in real-time',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
               ),
@@ -105,14 +89,7 @@ class Onboarding1Screen extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Onboarding2Screen(),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2449DE),
                     shape: RoundedRectangleBorder(
