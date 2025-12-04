@@ -11,13 +11,13 @@ class GetcodeScreen extends StatefulWidget {
 }
 
 class _GetcodeScreenState extends State<GetcodeScreen> {
-  // 6 controllers for 6 boxes
+  // 6 ota OTP box ko lagi controllers
   final List<TextEditingController> _controllers = List.generate(
     6,
     (_) => TextEditingController(),
   );
 
-  // 6 focus nodes
+  // 6 ota focus nodes
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
@@ -83,7 +83,6 @@ class _GetcodeScreenState extends State<GetcodeScreen> {
                     message: "You can now reset your password",
                   );
 
-                  // Later you can navigate:
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => ResetPasswordScreen()),

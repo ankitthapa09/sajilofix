@@ -37,6 +37,5 @@ class OtpboxWidget extends StatelessWidget {
         },
       ),
     );
-    ;
   }
 }
