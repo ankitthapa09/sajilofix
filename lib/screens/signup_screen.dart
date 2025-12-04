@@ -24,20 +24,30 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(),
       //backgroundColor: Color(0xFFF9F9F9),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Form(
           key: _formkey,
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                //alignment: Alignment.topLeft,
-                child: Text(
-                  "Create an\n account",
-                  style: TextStyle(fontSize: 34.0, fontWeight: FontWeight.bold),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    //alignment: Alignment.topLeft,
+                    child: Text(
+                      "Create an\n account",
+                      style: TextStyle(
+                        fontSize: 34.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Image.asset("assets/images/sajilofix_logo.png", height: 120),
+                ],
               ),
+
               const SizedBox(height: 30),
               TextFormField(
                 controller: _emailController,

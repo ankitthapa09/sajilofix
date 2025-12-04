@@ -88,9 +88,19 @@ class _GetcodeScreenState extends State<GetcodeScreen> {
                     MaterialPageRoute(builder: (_) => ResetPasswordScreen()),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E5BFF),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: const Text(
                   "Verify Code",
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

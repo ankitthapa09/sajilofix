@@ -29,12 +29,22 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                child: Text(
-                  "Welcome \n Back!",
-                  style: TextStyle(fontSize: 34.0, fontWeight: FontWeight.bold),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    child: Text(
+                      "Welcome \n Back!",
+                      style: TextStyle(
+                        fontSize: 34.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Image.asset("assets/images/sajilofix_logo.png", height: 120),
+                ],
               ),
+
               SizedBox(height: 20),
               TextFormField(
                 controller: _loginEmailController,

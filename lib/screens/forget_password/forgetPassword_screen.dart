@@ -19,21 +19,27 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
       appBar: AppBar(),
       //backgroundColor: Color(0xFFF9F9F9),
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         child: Form(
           key: _formkey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                child: Text(
-                  " Forgot\n Password?",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    child: Text(
+                      " Forgot\n Password?",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  Image.asset("assets/images/sajilofix_logo.png", height: 120),
+                ],
               ),
               const SizedBox(height: 20),
               TextFormField(

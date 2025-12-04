@@ -51,12 +51,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Reset Password",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    child: const Text(
+                      "Reset\nPassword",
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Image.asset("assets/images/sajilofix_logo.png", height: 120),
+                ],
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
               TextFormField(
                 controller: _passController,
