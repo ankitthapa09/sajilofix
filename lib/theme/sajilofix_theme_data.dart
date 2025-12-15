@@ -44,15 +44,14 @@ ThemeData getSalijoFixAppTheme() {
     //   elevation: 20,
     // ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.transparent, // Glass background outside
       elevation: 0,
       type: BottomNavigationBarType.fixed,
 
       selectedItemColor: Color.fromARGB(255, 245, 232, 114),
       unselectedItemColor: Color.fromARGB(255, 255, 255, 255),
 
-      selectedIconTheme: IconThemeData(size: 30),
-      unselectedIconTheme: IconThemeData(size: 26),
+      selectedIconTheme: IconThemeData(size: 32),
+      unselectedIconTheme: IconThemeData(size: 28),
 
       selectedLabelStyle: TextStyle(
         fontSize: 15,
@@ -99,16 +98,13 @@ ThemeData getSalijoFixAppTheme() {
       ),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFFF9F9F9), // AppBar color
-      elevation: 2, // Shadow
-      centerTitle: true, // Center title
-      surfaceTintColor: Colors.transparent, // Remove M3 weird overlay
-      iconTheme: IconThemeData(
-        size: 18,
-        color: Colors.black, // Back button color
-      ),
+      backgroundColor: Color(0xFFF9F9F9),
+      elevation: 9,
+      centerTitle: true,
+      surfaceTintColor: Colors.transparent,
+      //iconTheme: IconThemeData(size: 18, color: Colors.black),
       titleTextStyle: TextStyle(
-        color: Colors.black, // Title color
+        color: Colors.black,
         fontSize: 20,
         fontFamily: "Poppins",
       ),
