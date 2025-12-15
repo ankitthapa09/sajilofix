@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/screens/splash_screen.dart';
+import 'package:sajilofix/theme/sajilofix_theme_data.dart';
 
 class SajiloFix extends StatelessWidget {
   const SajiloFix({super.key});
@@ -8,7 +9,7 @@ class SajiloFix extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Sajilo Fix",
-      theme: ThemeData(fontFamily: "Poppins"),
+      theme: getSalijoFixAppTheme(),
       home: SplashScreen(),
     );
   }

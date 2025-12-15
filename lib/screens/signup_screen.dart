@@ -139,7 +139,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Color(0xFF2449DE),
+                    //backgroundColor: Color(0xFF2449DE),
                   ),
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
@@ -160,11 +160,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   child: Text(
                     "Create Account",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    // style: TextStyle(
+                    //   fontSize: 20,
+                    //   color: Colors.white,
+                    //   fontWeight: FontWeight.bold,
+                    // ),
                   ),
                 ),
               ),
