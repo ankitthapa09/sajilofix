@@ -100,16 +100,16 @@ class _ReportStep1State extends State<ReportStep1> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 9),
 
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Back"),
-              ),
-            ),
+            // Center(
+            //   child: TextButton(
+            //     onPressed: () {
+            //       Navigator.pop(context);
+            //     },
+            //     child: const Text("Back"),
+            //   ),
+            // ),
           ],
         ),
       ),
