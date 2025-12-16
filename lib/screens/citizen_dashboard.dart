@@ -38,35 +38,38 @@ class _CitizenDashboardState extends State<CitizenDashboard> {
             ),
           ),
 
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            currentIndex: _selectedIndex,
-            onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              currentIndex: _selectedIndex,
+              onTap: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
 
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded),
-                label: "Home",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt_rounded),
-                label: "Report",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.assignment_rounded),
-                label: "My Reports",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded),
-                label: "Profile",
-              ),
-            ],
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_rounded),
+                  label: "Home",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.camera_alt_rounded),
+                  label: "Report",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.assignment_rounded),
+                  label: "My Reports",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_rounded),
+                  label: "Profile",
+                ),
+              ],
+            ),
           ),
         ),
       ),
