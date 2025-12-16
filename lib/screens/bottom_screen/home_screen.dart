@@ -48,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
-                          "Report an Issue",
+                          "Report an Issue ",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
