@@ -3,6 +3,7 @@ import 'package:sajilofix/common/sajiloFix_snackbar.dart';
 import 'package:sajilofix/screens/citizen_dashboard.dart';
 import 'package:sajilofix/screens/forget_password/forgetPassword_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
+import 'package:sajilofix/widgets/gradiant_elevated_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -122,11 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 50,
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Color(0xFF2449DE),
-                  ),
+                child: GradientElevatedButton(
+                  text: 'Login',
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
                       _loginEmailController.clear();
@@ -144,14 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     }
                   },
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
               ),
               SizedBox(height: 20),

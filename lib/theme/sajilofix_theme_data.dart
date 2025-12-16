@@ -16,7 +16,7 @@ ThemeData getSalijoFixAppTheme() {
           //fontWeight: FontWeight.w400,
         ),
         foregroundColor: Colors.white,
-        backgroundColor: Color(0xFF2449DE),
+        backgroundColor: Color(0xFF3533cd),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(90)),
         elevation: 10,
       ),

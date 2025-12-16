@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:sajilofix/screens/onboarding_screens/onboarding2_screen.dart';
 import 'package:sajilofix/screens/signup_screen.dart';
 
-class Onboarding1Screen extends StatelessWidget {
+class Onboarding1Screen extends StatefulWidget {
   const Onboarding1Screen({super.key});
 
+  @override
+  State<Onboarding1Screen> createState() => _Onboarding1ScreenState();
+}
+
+class _Onboarding1ScreenState extends State<Onboarding1Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,7 +119,7 @@ class Onboarding1Screen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2449DE),
+                    backgroundColor: Color(0xFF3533cd),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),

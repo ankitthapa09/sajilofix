@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
 import 'package:sajilofix/screens/login_screen.dart';
+import 'package:sajilofix/widgets/gradiant_elevated_button.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -136,11 +137,8 @@ class _SignupScreenState extends State<SignupScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    //backgroundColor: Color(0xFF2449DE),
-                  ),
+                child: GradientElevatedButton(
+                  text: "Create Account",
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
                       _emailController.clear();
@@ -158,14 +156,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       );
                     }
                   },
-                  child: Text(
-                    "Create Account",
-                    // style: TextStyle(
-                    //   fontSize: 20,
-                    //   color: Colors.white,
-                    //   fontWeight: FontWeight.bold,
-                    // ),
-                  ),
                 ),
               ),
               SizedBox(height: 40),
