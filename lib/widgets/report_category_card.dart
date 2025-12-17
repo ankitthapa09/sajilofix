@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ReportCategoryCard extends StatelessWidget {
-  final IconData icon;
+  final String iconpath;
   final String title;
   final bool isSelected;
   final VoidCallback onTap;
 
   const ReportCategoryCard({
     super.key,
-    required this.icon,
+    required this.iconpath,
     required this.title,
     required this.isSelected,
     required this.onTap,
@@ -23,14 +23,21 @@ class ReportCategoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.green : Colors.grey.shade300,
-            width: 2,
+            color: isSelected
+                ? const Color.fromARGB(255, 43, 78, 255)
+                : const Color.fromARGB(255, 203, 216, 250),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 36),
+            Image.asset(
+              iconpath,
+              width: 50,
+              height: 50,
+              // color: isSelected ? Colors.blue : Colors.black87,
+            ),
             const SizedBox(height: 12),
             Text(
               title,

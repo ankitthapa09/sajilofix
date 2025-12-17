@@ -47,8 +47,8 @@ ThemeData getSalijoFixAppTheme() {
       elevation: 0,
       type: BottomNavigationBarType.fixed,
 
-      selectedItemColor: Color.fromARGB(255, 245, 232, 114),
-      unselectedItemColor: Color.fromARGB(255, 255, 255, 255),
+      selectedItemColor: Color.fromARGB(255, 255, 255, 255),
+      unselectedItemColor: Color.fromARGB(255, 165, 165, 165),
 
       selectedIconTheme: IconThemeData(size: 32),
       unselectedIconTheme: IconThemeData(size: 28),

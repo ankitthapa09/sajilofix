@@ -14,13 +14,13 @@ class _ReportStep1State extends State<ReportStep1> {
   int selectedIndex = -1;
 
   final List<Map<String, dynamic>> categories = [
-    {"icon": Icons.construction, "title": "Roads & Potholes"},
-    {"icon": Icons.lightbulb, "title": "Electricity"},
-    {"icon": Icons.water_drop, "title": "Water Supply"},
-    {"icon": Icons.delete, "title": "Waste Management"},
-    {"icon": Icons.lightbulb, "title": "Street Lights"},
-    {"icon": Icons.apartment, "title": "Public Infrastructure"},
-    {"icon": Icons.description, "title": "Other"},
+    {"icon": "assets/icons/pothole.png", "title": "Roads & Potholes"},
+    {"icon": "assets/icons/energy-saving.png", "title": "Electricity"},
+    {"icon": "assets/icons/water-tap.png", "title": "Water Supply"},
+    {"icon": "assets/icons/trash-can.png", "title": "Waste Management"},
+    {"icon": "assets/icons/street-light.png", "title": "Street Lights"},
+    {"icon": "assets/icons/constructor.png", "title": "Public Infrastructure"},
+    {"icon": "assets/icons/other-issues.png", "title": "Other"},
   ];
 
   @override
@@ -68,7 +68,7 @@ class _ReportStep1State extends State<ReportStep1> {
                 itemBuilder: (context, index) {
                   final item = categories[index];
                   return ReportCategoryCard(
-                    icon: item["icon"],
+                    iconpath: item["icon"],
                     title: item["title"],
                     isSelected: selectedIndex == index,
                     onTap: () {
