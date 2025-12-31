@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/screens/bottom_screen/report/report_step4.dart';
 import 'package:sajilofix/widgets/location_card.dart';
 import 'package:sajilofix/widgets/map_placeholder.dart';
 import 'package:sajilofix/widgets/report_progress_bar.dart';
@@ -16,6 +17,8 @@ class ReportStep3 extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const ReportProgressBar(currentStep: 3, totalSteps: 6),
+
+            const Divider(),
 
             const SizedBox(height: 24),
 
@@ -68,7 +71,12 @@ class ReportStep3 extends StatelessWidget {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ReportStep4()),
+                  );
+                },
                 child: const Text("Continue"),
               ),
             ),
