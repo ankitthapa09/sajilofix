@@ -1,44 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/screens/login_screen.dart';
-import 'package:sajilofix/widgets/gradiant_elevated_button.dart';
+import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:sajilofix/features/auth/presentation/pages/forget_password/forget_password_screen.dart';
+import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
+import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   bool showPassword = false;
-  bool showconfirmPass = false;
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passController = TextEditingController();
-  final TextEditingController _confirmPassController = TextEditingController();
+  final TextEditingController _loginEmailController = TextEditingController();
+  final TextEditingController _loginPassController = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      //backgroundColor: Color(0xFFF9F9F9),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         child: Form(
           key: _formkey,
           child: Column(
-            // mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    //alignment: Alignment.topLeft,
                     child: Text(
-                      "Create an\n account",
+                      "Welcome \n Back!",
                       style: TextStyle(
                         fontSize: 34.0,
                         fontWeight: FontWeight.bold,
@@ -49,9 +46,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: 20),
               TextFormField(
-                controller: _emailController,
+                controller: _loginEmailController,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.person),
                   labelText: "Enter email",
@@ -65,113 +62,102 @@ class _SignupScreenState extends State<SignupScreen> {
                     return "Please enter email";
                   }
                   if (!value.contains("@")) {
-                    return "Enter a valid email";
+                    return "Please enter valid email";
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
               TextFormField(
-                controller: _passController,
+                controller: _loginPassController,
                 obscureText: !showPassword,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: Icon(Icons.lock),
                   labelText: "Password",
+                  labelStyle: TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(18.0),
                   ),
                   suffixIcon: IconButton(
-                    icon: Icon(
-                      showPassword ? Icons.visibility : Icons.visibility_off,
-                    ),
                     onPressed: () {
                       setState(() {
                         showPassword = !showPassword;
                       });
                     },
+                    icon: Icon(
+                      showPassword ? Icons.visibility : Icons.visibility_off,
+                    ),
                   ),
                 ),
-
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter password!";
-                  }
-                  if (value.length < 6) {
-                    return "Password must be at least 6 characters";
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
-              TextFormField(
-                controller: _confirmPassController,
-                obscureText: !showconfirmPass,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.lock),
-                  labelText: "Confirm Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      showconfirmPass ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        showconfirmPass = !showconfirmPass;
-                      });
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ForgetpasswordScreen(),
+                        ),
+                      );
                     },
+                    child: const Text(
+                      "Forget Password?",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please confirm password";
-                  }
-                  if (value != _passController.text) {
-                    return "Password do not match";
-                  }
-                  return null;
-                },
+                ],
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 20),
               SizedBox(
-                width: double.infinity,
                 height: 50,
+                width: double.infinity,
                 child: GradientElevatedButton(
-                  text: "Create Account",
+                  text: 'Login',
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
-                      _emailController.clear();
-                      _passController.clear();
-                      _confirmPassController.clear();
+                      _loginEmailController.clear();
+                      _loginPassController.clear();
 
                       showMySnackBar(
                         context: context,
-                        message: "Account Created Successfully",
+                        message: "Login Sucessfull!",
                       );
-
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => CitizenDashboard(),
+                        ),
                       );
                     }
                   },
                 ),
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already Have an Account  "),
+                  const Text("Create an Account  "),
                   InkWell(
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        MaterialPageRoute(builder: (context) => SignupScreen()),
                       );
                     },
                     child: const Text(
-                      "Login",
+                      "Sign Up",
                       style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,

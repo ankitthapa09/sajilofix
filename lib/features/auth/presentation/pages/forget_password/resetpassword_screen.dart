@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/screens/login_screen.dart';
+import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});

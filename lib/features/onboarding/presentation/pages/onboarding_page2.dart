@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/onboarding_screens/onboarding2_screen.dart';
-import 'package:sajilofix/screens/signup_screen.dart';
+import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page3.dart';
+import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
 
 class Onboarding1Screen extends StatefulWidget {
   const Onboarding1Screen({super.key});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/bottom_screen/report/report_step3.dart';
-import 'package:sajilofix/widgets/add_photo_card.dart';
-import 'package:sajilofix/widgets/empty_photo_state.dart';
-import 'package:sajilofix/widgets/report_app_bar.dart';
-import 'package:sajilofix/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step3.dart';
+import 'package:sajilofix/core/widgets/add_photo_card.dart';
+import 'package:sajilofix/core/widgets/empty_photo_state.dart';
+import 'package:sajilofix/core/widgets/report_app_bar.dart';
+import 'package:sajilofix/core/widgets/report_progress_bar.dart';
 
 class ReportStep2 extends StatelessWidget {
   const ReportStep2({super.key});
