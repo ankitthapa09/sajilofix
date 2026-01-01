@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/bottom_screen/report/report_step2.dart';
-import 'package:sajilofix/widgets/report_category_card.dart';
-import 'package:sajilofix/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step2.dart';
+import 'package:sajilofix/core/widgets/report_category_card.dart';
+import 'package:sajilofix/core/widgets/report_progress_bar.dart';
 
 class ReportStep1 extends StatefulWidget {
   const ReportStep1({super.key});

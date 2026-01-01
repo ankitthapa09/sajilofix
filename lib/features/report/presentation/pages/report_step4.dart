@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/widgets/report_progress_bar.dart';
-import 'package:sajilofix/widgets/severity_option.dart';
+import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:sajilofix/core/widgets/severity_option.dart';
 
 class ReportStep4 extends StatefulWidget {
   const ReportStep4({super.key});

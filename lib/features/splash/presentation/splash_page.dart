@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/onboarding_screens/onboarding_screen.dart';
+import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 //import 'package:sajilofix/screens/signup_screen.dart';
 
 class SplashScreen extends StatefulWidget {

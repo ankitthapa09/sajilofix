@@ -22,8 +22,8 @@ class ReportCategoryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color.fromARGB(255, 43, 78, 255).withOpacity(
-                  0.1,
+              ? const Color.fromARGB(255, 43, 78, 255).withValues(
+                  alpha: 0.1,
                 ) // Add background color when selected
               : Colors.white,
           borderRadius: BorderRadius.circular(16),

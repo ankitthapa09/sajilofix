@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/screens/forget_password/resetpassword_screen.dart';
-import 'package:sajilofix/widgets/otpbox_widget.dart';
+import 'package:sajilofix/features/auth/presentation/pages/forget_password/resetpassword_screen.dart';
+import 'package:sajilofix/core/widgets/otpbox_widget.dart';
 
 class GetcodeScreen extends StatefulWidget {
   const GetcodeScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/citizen_dashboard.dart';
-import 'package:sajilofix/screens/splash_screen.dart';
+import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilofix/app/theme/app_theme.dart';
+import 'package:sajilofix/features/splash/presentation/splash_page.dart';
 
 class SajiloFix extends StatelessWidget {
   const SajiloFix({super.key});
@@ -11,7 +11,7 @@ class SajiloFix extends StatelessWidget {
     return MaterialApp(
       title: "Sajilo Fix",
       theme: getSalijoFixAppTheme(),
-      home: CitizenDashboard(),
+      home: SplashScreen(),
     );
   }
 }

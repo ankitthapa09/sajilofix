@@ -1,11 +1,9 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/bottom_screen/home_screen.dart';
-import 'package:sajilofix/screens/bottom_screen/myreport_screen.dart';
-import 'package:sajilofix/screens/bottom_screen/profile_screen.dart';
-import 'package:sajilofix/screens/bottom_screen/report/report_step1.dart';
-//import 'package:sajilofix/screens/bottom_screen/report_screen.dart';
+import 'package:sajilofix/features/dashboard/presentation/pages/home_page.dart';
+import 'package:sajilofix/features/dashboard/presentation/pages/myreport_page.dart';
+import 'package:sajilofix/features/dashboard/presentation/pages/profile_page.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step1.dart';
+//import 'package:sajilofix/features/report/presentation/pages/report_screen.dart';
 
 class CitizenDashboard extends StatefulWidget {
   const CitizenDashboard({super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/screens/bottom_screen/report/report_step4.dart';
-import 'package:sajilofix/widgets/location_card.dart';
-import 'package:sajilofix/widgets/map_placeholder.dart';
-import 'package:sajilofix/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step4.dart';
+import 'package:sajilofix/core/widgets/location_card.dart';
+import 'package:sajilofix/core/widgets/map_placeholder.dart';
+import 'package:sajilofix/core/widgets/report_progress_bar.dart';
 
 class ReportStep3 extends StatelessWidget {
   const ReportStep3({super.key});
