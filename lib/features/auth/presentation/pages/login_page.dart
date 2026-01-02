@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/forget_password/forget_password_screen.dart';
 import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool showPassword = false;
 
   int _selectedRoleIndex = 0; // 0 = Citizen, 1 = Admin
@@ -189,8 +191,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: 'Login',
                         height: 54,
                         borderRadius: 18,
-                        onPressed: () {
-                          if (_formkey.currentState!.validate()) {
+                        onPressed: () async {
+                          final isValid =
+                              _formkey.currentState?.validate() ?? false;
+                          if (!isValid) return;
+
+                          try {
+                            await ref
+                                .read(loginUseCaseProvider)
+                                .call(
+                                  email: _loginEmailController.text,
+                                  password: _loginPassController.text,
+                                  roleIndex: _selectedRoleIndex,
+                                );
+
+                            if (!context.mounted) return;
                             showMySnackBar(
                               context: context,
                               message: _selectedRoleIndex == 0
@@ -203,6 +218,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               MaterialPageRoute(
                                 builder: (context) => const CitizenDashboard(),
                               ),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            showMySnackBar(
+                              context: context,
+                              message: e.toString(),
                             );
                           }
                         },
