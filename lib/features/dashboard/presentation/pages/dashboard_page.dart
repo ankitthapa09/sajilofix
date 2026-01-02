@@ -6,14 +6,22 @@ import 'package:sajilofix/features/report/presentation/pages/report_step1.dart';
 //import 'package:sajilofix/features/report/presentation/pages/report_screen.dart';
 
 class CitizenDashboard extends StatefulWidget {
-  const CitizenDashboard({super.key});
+  final int initialIndex;
+
+  const CitizenDashboard({super.key, this.initialIndex = 0});
 
   @override
   State<CitizenDashboard> createState() => _CitizenDashboardState();
 }
 
 class _CitizenDashboardState extends State<CitizenDashboard> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex.clamp(0, 3);
+  }
 
   List<Widget> lstBottomScreen = [
     const HomeScreen(),

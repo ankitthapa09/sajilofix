@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:sajilofix/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/domain/repositories/auth_repository.dart';
 import 'package:sajilofix/features/auth/domain/usecases/login_usecase.dart';
 import 'package:sajilofix/features/auth/domain/usecases/signup_usecase.dart';
@@ -19,4 +20,8 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
 
 final signupUseCaseProvider = Provider<SignupUseCase>((ref) {
   return SignupUseCase(ref.read(authRepositoryProvider));
+});
+
+final currentUserProvider = FutureProvider<AuthUser?>((ref) {
+  return ref.read(authRepositoryProvider).getCurrentUser();
 });

@@ -205,6 +205,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   roleIndex: _selectedRoleIndex,
                                 );
 
+                            ref.invalidate(currentUserProvider);
+
                             if (!context.mounted) return;
                             showMySnackBar(
                               context: context,
