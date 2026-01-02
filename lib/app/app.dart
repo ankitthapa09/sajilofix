@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilofix/app/theme/app_theme.dart';
 import 'package:sajilofix/features/splash/presentation/splash_page.dart';
 
@@ -11,7 +10,7 @@ class SajiloFix extends StatelessWidget {
     return MaterialApp(
       title: "Sajilo Fix",
       theme: getSalijoFixAppTheme(),
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }
