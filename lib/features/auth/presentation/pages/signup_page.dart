@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
@@ -10,15 +11,16 @@ import 'package:sajilofix/features/auth/presentation/widgets/signup/role_card.da
 import 'package:sajilofix/features/auth/presentation/widgets/signup/section_card.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/signup_step_scaffold.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/summary_row.dart';
+import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final PageController _pageController = PageController();
 
   int _stepIndex = 0; // 0..2
@@ -110,12 +112,39 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    showMySnackBar(context: context, message: 'Account Created Successfully');
+    () async {
+      try {
+        await ref
+            .read(signupUseCaseProvider)
+            .call(
+              fullName: _fullNameController.text,
+              email: _emailController.text,
+              phone: _phoneController.text,
+              roleIndex: _selectedRoleIndex,
+              password: _passController.text,
+              dob: _dobController.text,
+              citizenshipNumber: _citizenshipController.text,
+              district: _district,
+              municipality: _municipality,
+              ward: _ward,
+              tole: _toleController.text,
+            );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+        if (!mounted) return;
+        showMySnackBar(
+          context: context,
+          message: 'Account created successfully. Please log in.',
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        showMySnackBar(context: context, message: e.toString());
+      }
+    }();
   }
 
   @override
