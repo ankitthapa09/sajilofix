@@ -18,12 +18,9 @@ class HiveService {
     }
 
     await Hive.openBox<LocalUser>(HiveBoxes.users);
-    await Hive.openBox(HiveBoxes.session);
 
     _initialized = true;
   }
 
   static Box<LocalUser> usersBox() => Hive.box<LocalUser>(HiveBoxes.users);
-
-  static Box sessionBox() => Hive.box(HiveBoxes.session);
 }

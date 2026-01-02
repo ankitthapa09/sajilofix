@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserAsync = ref.watch(currentUserProvider);
+    final fullName = currentUserAsync.maybeWhen(
+      data: (user) => user?.fullName,
+      orElse: () => null,
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xffF9F9F9),
       body: SafeArea(
@@ -18,9 +26,12 @@ class HomeScreen extends StatelessWidget {
                   Image.asset("assets/images/sajilofix_logo.png", height: 100),
                 ],
               ),
-              const Text(
-                "Hello, Ankit 👋",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                "Hello, ${fullName ?? 'User'} 👋",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 4),

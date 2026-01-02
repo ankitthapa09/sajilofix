@@ -1,21 +1,34 @@
-import 'package:sajilofix/core/constants/hive_constants.dart';
-import 'package:sajilofix/core/services/hive/hive_service.dart';
+import 'package:sajilofix/core/constants/session_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSessionService {
   UserSessionService._();
 
+  static SharedPreferences? _prefs;
+
+  static Future<void> init() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
+
+  static Future<SharedPreferences> _ensurePrefs() async {
+    if (_prefs != null) return _prefs!;
+    _prefs = await SharedPreferences.getInstance();
+    return _prefs!;
+  }
+
   static String? get currentUserEmail {
-    return HiveService.sessionBox().get(HiveSessionKeys.currentUserEmail)
-        as String?;
+    return _prefs?.getString(SessionKeys.currentUserEmail);
   }
 
   static bool get isLoggedIn => (currentUserEmail ?? '').isNotEmpty;
 
   static Future<void> setCurrentUserEmail(String email) async {
-    await HiveService.sessionBox().put(HiveSessionKeys.currentUserEmail, email);
+    final prefs = await _ensurePrefs();
+    await prefs.setString(SessionKeys.currentUserEmail, email);
   }
 
   static Future<void> clear() async {
-    await HiveService.sessionBox().delete(HiveSessionKeys.currentUserEmail);
+    final prefs = await _ensurePrefs();
+    await prefs.remove(SessionKeys.currentUserEmail);
   }
 }
