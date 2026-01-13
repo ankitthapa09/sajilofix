@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:sajilofix/features/auth/presentation/pages/forget_password/forget_password_screen.dart';
-import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
@@ -47,7 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                Image.asset('assets/images/sajilofix_logo.png', height: 90),
+                Image.asset('assets/images/sajilofix_logo.png', height: 120),
                 const SizedBox(height: 18),
 
                 Container(
@@ -168,12 +166,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.push(
+                            Navigator.pushNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ForgetpasswordScreen(),
-                              ),
+                              AppRoutes.forgotPassword,
                             );
                           },
                           child: Text(
@@ -215,11 +210,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   : 'Login Successful (Admin)!',
                             );
 
-                            Navigator.pushReplacement(
+                            Navigator.pushReplacementNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => const CitizenDashboard(),
-                              ),
+                              AppRoutes.dashboard,
                             );
                           } catch (e) {
                             if (!context.mounted) return;
@@ -302,11 +295,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushReplacement(
+                              Navigator.pushReplacementNamed(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SignupScreen(),
-                                ),
+                                AppRoutes.signup,
                               );
                             },
                             child: Text(

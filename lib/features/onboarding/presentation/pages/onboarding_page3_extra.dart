@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 
 class Onboarding3Screen extends StatelessWidget {
   const Onboarding3Screen({super.key});
@@ -100,10 +100,7 @@ class Onboarding3Screen extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignupScreen()),
-                    );
+                    Navigator.pushReplacementNamed(context, AppRoutes.signup);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2449DE),

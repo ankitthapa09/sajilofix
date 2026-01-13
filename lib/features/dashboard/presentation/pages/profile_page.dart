@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -31,10 +30,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await ref.read(authRepositoryProvider).logout();
       ref.invalidate(currentUserProvider);
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
     } catch (e) {
       if (!mounted) return;
       showMySnackBar(context: context, message: e.toString());
@@ -42,9 +40,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _goToTab(int index) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => CitizenDashboard(initialIndex: index)),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacementNamed(AppRoutes.dashboard, arguments: index);
   }
 
   String _initials(String? name) {

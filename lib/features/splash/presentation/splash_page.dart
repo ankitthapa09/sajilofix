@@ -1,28 +1,40 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
+import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 //import 'package:sajilofix/screens/signup_screen.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
 
-    Timer(
-      const Duration(seconds: 4),
-      () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      ),
-    );
+    Timer(const Duration(seconds: 4), _routeFromSplash);
+  }
+
+  Future<void> _routeFromSplash() async {
+    try {
+      final user = await ref.read(currentUserProvider.future);
+      if (!mounted) return;
+
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+    }
   }
 
   @override
