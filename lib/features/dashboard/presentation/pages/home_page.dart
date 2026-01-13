@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -23,7 +24,13 @@ class HomeScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Image.asset("assets/images/sajilofix_logo.png", height: 100),
+                  Hero(
+                    tag: HeroTags.appLogo,
+                    child: Image.asset(
+                      "assets/images/sajilofix_logo.png",
+                      height: 100,
+                    ),
+                  ),
                 ],
               ),
               Text(
