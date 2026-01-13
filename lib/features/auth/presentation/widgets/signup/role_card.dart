@@ -6,6 +6,8 @@ class RoleCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final Color? borderColor;
+  final double? borderWidth;
 
   const RoleCard({
     super.key,
@@ -14,6 +16,8 @@ class RoleCard extends StatelessWidget {
     required this.icon,
     required this.selected,
     required this.onTap,
+    this.borderColor,
+    this.borderWidth,
   });
 
   @override
@@ -33,10 +37,12 @@ class RoleCard extends StatelessWidget {
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary
-                : theme.dividerColor.withValues(alpha: 0.35),
-            width: selected ? 2 : 1,
+            color:
+                borderColor ??
+                (selected
+                    ? theme.colorScheme.primary
+                    : theme.dividerColor.withValues(alpha: 0.35)),
+            width: borderWidth ?? (selected ? 2 : 1),
           ),
         ),
         child: Column(

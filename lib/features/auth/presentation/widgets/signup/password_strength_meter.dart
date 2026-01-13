@@ -30,7 +30,7 @@ class PasswordStrengthMeter extends StatelessWidget {
       PasswordStrength.none => Colors.transparent,
       PasswordStrength.weak => Colors.red,
       PasswordStrength.medium => Colors.orange,
-      PasswordStrength.strong => theme.colorScheme.primary,
+      PasswordStrength.strong => Colors.green,
     };
 
     final strengthValue = switch (strength) {

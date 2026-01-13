@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -45,7 +46,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                Image.asset('assets/images/sajilofix_logo.png', height: 120),
+                Hero(
+                  tag: HeroTags.appLogo,
+                  child: Image.asset(
+                    'assets/images/sajilofix_logo.png',
+                    height: 120,
+                  ),
+                ),
                 const SizedBox(height: 18),
 
                 Container(

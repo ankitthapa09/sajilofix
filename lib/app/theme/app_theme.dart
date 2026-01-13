@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/core/theme/gradient_outline_input_border.dart';
 
 ThemeData getSalijoFixAppTheme() {
   const brandBlue = Color(0xFF2449DE);
   const brandIndigo = Color(0xFF3533cd);
+  const brandInk = Color(0xFF041027);
+  const brandGradient = LinearGradient(
+    colors: [Color(0xFF041027), Color(0xFF3533cd)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(
@@ -76,28 +83,51 @@ ThemeData getSalijoFixAppTheme() {
 
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
+      // Keep the field readable; premium look comes from gradient border.
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.black, width: 1.2),
+      border: const GradientOutlineInputBorder(
+        gradient: brandGradient,
+        borderRadius: BorderRadius.all(Radius.circular(18)),
+        borderSide: BorderSide(width: 1.6),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: GradientOutlineInputBorder(
+        gradient: LinearGradient(
+          colors: [Color(0xFF041027), Color(0xFF3533cd)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Color(0xFF155DFC), width: 2.5),
+        borderSide: BorderSide(
+          width: 1.8,
+          color: brandIndigo.withValues(alpha: 0.25),
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF1557B0), width: 3),
+      focusedBorder: const GradientOutlineInputBorder(
+        gradient: LinearGradient(
+          colors: [Color(0xFF3533cd), Color(0xFF041027)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(width: 2.4),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(18),
         borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(18),
         borderSide: const BorderSide(color: Colors.red, width: 2),
       ),
+      prefixIconColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.focused)) return brandIndigo;
+        return brandInk;
+      }),
+      suffixIconColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.focused)) return brandIndigo;
+        return brandInk;
+      }),
       hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
       labelStyle: const TextStyle(
         fontSize: 18,

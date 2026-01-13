@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
+import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/core/widgets/onboarding_page_widget.dart';
 
@@ -31,9 +32,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Image.asset(
-                        "assets/images/sajilofix_logo.png",
-                        height: 100,
+                      Hero(
+                        tag: HeroTags.appLogo,
+                        child: Image.asset(
+                          "assets/images/sajilofix_logo.png",
+                          height: 100,
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
