@@ -5,6 +5,7 @@ class SignupStepScaffold extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget child;
+  final ScrollController? scrollController;
 
   const SignupStepScaffold({
     super.key,
@@ -12,6 +13,7 @@ class SignupStepScaffold extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.child,
+    this.scrollController,
   });
 
   @override
@@ -20,6 +22,7 @@ class SignupStepScaffold extends StatelessWidget {
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return SingleChildScrollView(
+      controller: scrollController,
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 90),
       child: Column(
         children: [

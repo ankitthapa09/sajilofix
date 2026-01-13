@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
-import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/dropdown_field.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/labeled_field.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/password_strength.dart';
@@ -22,6 +22,7 @@ class SignupScreen extends ConsumerStatefulWidget {
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
   final PageController _pageController = PageController();
+  late final List<ScrollController> _stepScrollControllers;
 
   int _stepIndex = 0; // 0..2
   bool _showPassword = false;
@@ -51,8 +52,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _confirmPassController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _stepScrollControllers = List.generate(3, (_) => ScrollController());
+    for (final c in _stepScrollControllers) {
+      c.addListener(() {
+        if (!mounted) return;
+        setState(() {});
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
+    for (final c in _stepScrollControllers) {
+      c.dispose();
+    }
     _fullNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -75,6 +91,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOut,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final c = _stepScrollControllers[stepIndex];
+      if (c.hasClients) {
+        c.jumpTo(0);
+      }
+    });
   }
 
   void _handleBack() {
@@ -136,10 +160,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           message: 'Account created successfully. Please log in.',
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
       } catch (e) {
         if (!mounted) return;
         showMySnackBar(context: context, message: e.toString());
@@ -155,71 +176,122 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     final strength = passwordStrength(_passController.text);
 
+    final activeScrollController = _stepScrollControllers[_stepIndex];
+    const double maxHeaderScroll = 80.0;
+    final double headerOffset =
+        (activeScrollController.hasClients
+                ? activeScrollController.offset
+                : 0.0)
+            .clamp(0.0, maxHeaderScroll)
+            .toDouble();
+    final double t = (headerOffset / maxHeaderScroll)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final double logoOpacity = (1 - t).clamp(0.0, 1.0).toDouble();
+    final double logoHeightFactor = logoOpacity;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Image.asset(
-                'assets/images/sajilofix_logo.png',
-                height: 90,
-              ),
-            ),
+            const SizedBox(height: 4),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   IconButton(
                     onPressed: _handleBack,
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   ),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Step ${_stepIndex + 1} of 3',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: muted,
-                          ),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 420),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Step ${_stepIndex + 1} of 3',
+                                      textAlign: TextAlign.left,
+                                      style: theme.textTheme.labelLarge
+                                          ?.copyWith(color: muted),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _GradientProgressBar(
+                                      value: _progressValueForStep(_stepIndex),
+                                      height: 6,
+                                      backgroundColor: theme
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF3533cd),
+                                          Color(0xFF041027),
+                                          Color(0xFF3533cd),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    // Bigger + aligned exactly with progress start
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          AppRoutes.login,
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 10,
+                                        ),
+                                        foregroundColor: primary,
+                                        textStyle: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                      child: const Text('Login'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 18),
+                            ClipRect(
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                heightFactor: logoHeightFactor,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 120),
+                                  opacity: logoOpacity,
+                                  child: Image.asset(
+                                    'assets/images/sajilofix_logo.png',
+                                    height: 90,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(999),
-                          child: LinearProgressIndicator(
-                            value: _progressValueForStep(_stepIndex),
-                            backgroundColor:
-                                theme.colorScheme.surfaceContainerHighest,
-                            valueColor: AlwaysStoppedAnimation<Color>(primary),
-                            minHeight: 6,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Login',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -229,12 +301,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     icon: Icons.person_outline,
                     title: 'General Information',
                     subtitle: "Let's start with your basic details",
+                    scrollController: _stepScrollControllers[0],
                     child: Form(
                       key: _step1Key,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           LabeledField(
                             label: 'Full Name *',
                             child: TextFormField(
@@ -394,12 +467,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     icon: Icons.location_on_outlined,
                     title: 'Location Details',
                     subtitle: 'Help us show you relevant issues in your area',
+                    scrollController: _stepScrollControllers[1],
                     child: Form(
                       key: _step2Key,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           OutlinedButton.icon(
                             onPressed: () {
                               showMySnackBar(
@@ -524,12 +598,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     icon: Icons.shield_outlined,
                     title: 'Security & Verification',
                     subtitle: 'Set up your password and confirm your details',
+                    scrollController: _stepScrollControllers[2],
                     child: Form(
                       key: _step3Key,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           LabeledField(
                             label: 'Password *',
                             child: TextFormField(
@@ -722,6 +797,56 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 borderRadius: 999,
                 onPressed: _handleCreateAccount,
               ),
+      ),
+    );
+  }
+}
+
+class _GradientProgressBar extends StatelessWidget {
+  final double value;
+  final double height;
+  final Color backgroundColor;
+  final LinearGradient gradient;
+
+  const _GradientProgressBar({
+    required this.value,
+    required this.height,
+    required this.backgroundColor,
+    required this.gradient,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final clampedValue = value.clamp(0.0, 1.0);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(Radius.circular(999)),
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(decoration: BoxDecoration(color: backgroundColor)),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: clampedValue),
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              builder: (context, animatedValue, _) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: FractionallySizedBox(
+                    widthFactor: animatedValue,
+                    alignment: Alignment.centerLeft,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(gradient: gradient),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

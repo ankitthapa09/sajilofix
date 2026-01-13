@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
+import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -25,10 +26,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         message: "Password Changed Successfully!!",
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }
 
@@ -128,22 +126,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
+                child: GradientElevatedButton(
                   onPressed: _resetPassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E5BFF),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Reset Password",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+
+                  text: 'Reset Password',
                 ),
               ),
             ],

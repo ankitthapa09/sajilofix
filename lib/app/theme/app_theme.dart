@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
 ThemeData getSalijoFixAppTheme() {
+  const brandBlue = Color(0xFF2449DE);
+  const brandIndigo = Color(0xFF3533cd);
+
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 255, 255, 255),
-    ),
+      seedColor: brandIndigo,
+      brightness: Brightness.light,
+    ).copyWith(primary: brandIndigo, secondary: brandBlue),
     fontFamily: "Poppins",
     useMaterial3: true,
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: brandIndigo,
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         textStyle: TextStyle(
           fontSize: 20,
-          color: Color(0xFF2449DE),
+          color: brandBlue,
           fontWeight: FontWeight.bold,
           //fontWeight: FontWeight.w400,
         ),
         foregroundColor: Colors.white,
-        backgroundColor: Color(0xFF3533cd),
+        backgroundColor: brandIndigo,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(90)),
         elevation: 10,
       ),

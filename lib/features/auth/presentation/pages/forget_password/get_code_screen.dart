@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajiloFix_snackbar.dart';
-import 'package:sajilofix/features/auth/presentation/pages/forget_password/resetpassword_screen.dart';
+import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/core/widgets/otpbox_widget.dart';
 
 class GetcodeScreen extends StatefulWidget {
@@ -67,7 +68,7 @@ class _GetcodeScreenState extends State<GetcodeScreen> {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton(
+              child: GradientElevatedButton(
                 onPressed: () {
                   String otp = _controllers.map((e) => e.text).join();
                   if (otp.length != 6) {
@@ -83,25 +84,9 @@ class _GetcodeScreenState extends State<GetcodeScreen> {
                     message: "You can now reset your password",
                   );
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ResetPasswordScreen()),
-                  );
+                  Navigator.pushNamed(context, AppRoutes.resetPassword);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E5BFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Verify Code",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                text: 'Verify Code',
               ),
             ),
           ],

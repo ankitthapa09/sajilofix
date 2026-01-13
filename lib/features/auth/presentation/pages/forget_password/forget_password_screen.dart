@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
-import 'package:sajilofix/features/auth/presentation/pages/otp_page.dart';
+import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 
 class ForgetpasswordScreen extends StatefulWidget {
   const ForgetpasswordScreen({super.key});
@@ -87,11 +88,11 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Color(0xFF2449DE),
-                  ),
+                child: GradientElevatedButton(
+                  // style: ElevatedButton.styleFrom(
+                  //   padding: const EdgeInsets.symmetric(vertical: 12),
+                  //   backgroundColor: Color(0xFF2449DE),
+                  // ),
                   onPressed: () {
                     if (_formkey.currentState!.validate()) {
                       _getCodeEmailController.clear();
@@ -101,18 +102,10 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
                         message: "Code sent to your gmail.",
                       );
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GetcodeScreen(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, AppRoutes.getCode);
                     }
                   },
-                  child: Text(
-                    "Submit",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
+                  text: 'Submit',
                 ),
               ),
             ],
