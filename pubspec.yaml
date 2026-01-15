@@ -44,6 +44,7 @@ dependencies:
   dio_smart_retry: ^7.0.1
   flutter_secure_storage: ^9.2.4
   pretty_dio_logger: ^1.4.0
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:
