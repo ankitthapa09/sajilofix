@@ -8,7 +8,7 @@ class ApiConfig {
   // - ApiConfig owns the environment base URL (via --dart-define).
   static const String baseUrl = String.fromEnvironment(
     'SAJILOFIX_API_BASE_URL',
-    defaultValue: 'http://localhost:4000',
+    defaultValue: 'http://172.26.18.142:4000',
   );
 
   static Uri uriForPath(String path) {
