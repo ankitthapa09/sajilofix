@@ -70,9 +70,10 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
   @override
   Future<AuthApiModel> register(AuthApiModel user) async {
     try {
+      final payload = _sanitizeRegisterPayload(user.toJSON());
       final response = await _apiClient.post(
         ApiEndpoints.authRegister,
-        data: user.toJSON(),
+        data: payload,
       );
 
       final data = _asJsonMap(response.data);
@@ -91,6 +92,75 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     } catch (e) {
       throw ApiException.fromError(e);
     }
+  }
+
+  Map<String, dynamic> _sanitizeRegisterPayload(Map<String, dynamic> raw) {
+    final payload = Map<String, dynamic>.from(raw);
+
+    // Remove empty optional fields (common cause of validation failures).
+    payload.removeWhere(
+      (_, v) => v == null || (v is String && v.trim().isEmpty),
+    );
+
+    final phone = payload['phone'];
+    if (phone is String) {
+      payload['phone'] = _normalizePhone(phone);
+      if ((payload['phone'] as String).trim().isEmpty) {
+        payload.remove('phone');
+      }
+    }
+
+    final dob = payload['dob'];
+    if (dob is String) {
+      payload['dob'] = _normalizeDob(dob);
+    }
+
+    final ward = payload['ward'];
+    if (ward is String) {
+      final normalizedWard = _normalizeWard(ward);
+      if (normalizedWard.trim().isEmpty) {
+        payload.remove('ward');
+      } else {
+        payload['ward'] = normalizedWard;
+      }
+    }
+
+    return payload;
+  }
+
+  String _normalizePhone(String input) {
+    var v = input.trim().replaceAll(' ', '');
+    if (v.startsWith('+977')) v = v.substring(4);
+    if (v.startsWith('977')) v = v.substring(3);
+    if (v.startsWith('0') && v.length == 11) v = v.substring(1);
+    return v;
+  }
+
+  String _normalizeDob(String input) {
+    final v = input.trim();
+    if (v.isEmpty) return v;
+
+    // Convert dd/MM/yyyy -> yyyy-MM-dd
+    final parts = v.split('/');
+    if (parts.length == 3) {
+      final dd = int.tryParse(parts[0]);
+      final mm = int.tryParse(parts[1]);
+      final yyyy = int.tryParse(parts[2]);
+      if (dd != null && mm != null && yyyy != null) {
+        return '${yyyy.toString().padLeft(4, '0')}-${mm.toString().padLeft(2, '0')}-${dd.toString().padLeft(2, '0')}';
+      }
+    }
+
+    return v;
+  }
+
+  String _normalizeWard(String input) {
+    final v = input.trim();
+    if (v.isEmpty) return v;
+
+    // Accept "Ward 2" -> "2"
+    final match = RegExp(r'(\d+)').firstMatch(v);
+    return match?.group(1) ?? v;
   }
 
   ApiException _toApiException(DioException e) {
