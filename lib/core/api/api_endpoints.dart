@@ -1,9 +1,6 @@
 import 'package:sajilofix/core/api/api_config.dart';
 import 'package:sajilofix/core/api/api_paths.dart';
 
-/// Sample-style API endpoints + base URL/timeouts.
-///
-/// - `ApiConfig` owns the environment base URL (via --dart-define).
 /// - `ApiPaths` owns the raw route strings.
 /// - `ApiEndpoints` exposes a single place for client code to read base URL,
 ///   timeouts, and endpoint constants.

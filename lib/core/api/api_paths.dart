@@ -1,6 +1,5 @@
-/// Backend API route paths.
-///
-/// Keep this file free of environment-specific base URLs.
+// Backend API route paths.
+
 /// Base URL/config will be added separately (mobile vs web).
 class ApiPaths {
   ApiPaths._();

@@ -5,8 +5,8 @@ class ApiException implements Exception {
 
   const ApiException({required this.message, this.statusCode, this.data});
 
-  // Builds an [ApiException] from an HTTP response payload.
-  // Your backend uses a consistent shape: `{ "message": "..." }`.
+  // Builds an ApiException from an HTTP response payload.
+  // Sajilofix backend uses a consistent shape: `{ "message": "..." }`.
   factory ApiException.fromResponse({required int statusCode, Object? data}) {
     final message = _extractMessage(data) ?? 'Request failed';
     return ApiException(message: message, statusCode: statusCode, data: data);
