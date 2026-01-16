@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sajilofix/features/auth/data/datasources/auth_local_datasource.dart';
+import 'package:sajilofix/core/services/network/network_info.dart';
+import 'package:sajilofix/features/auth/data/datasources/local/auth_local_datasource.dart';
+import 'package:sajilofix/features/auth/data/datasources/remote/auth_datasource.dart';
 import 'package:sajilofix/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/domain/repositories/auth_repository.dart';
@@ -11,7 +13,11 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(ref.read(authLocalDataSourceProvider));
+  return AuthRepositoryImpl(
+    ref.read(authLocalDataSourceProvider),
+    remote: ref.read(authRemoteDatasourceProvider),
+    networkInfo: ref.read(networkInfoProvider),
+  );
 });
 
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
