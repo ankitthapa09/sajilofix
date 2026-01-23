@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sajilofix/core/widgets/report_progress_bar.dart';
-import 'package:sajilofix/core/widgets/severity_option.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step5.dart';
 
 class ReportStep4 extends StatefulWidget {
   const ReportStep4({super.key});
@@ -12,8 +12,6 @@ class ReportStep4 extends StatefulWidget {
 class _ReportStep4State extends State<ReportStep4> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-
-  String selectedSeverity = "Medium";
 
   @override
   Widget build(BuildContext context) {
@@ -75,72 +73,6 @@ class _ReportStep4State extends State<ReportStep4> {
                           "Describe the issue in detail... What is the problem? When did you notice it?",
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "How severe is this issue?",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Low",
-                          isSelected: selectedSeverity == "Low",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Low";
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Medium",
-                          isSelected: selectedSeverity == "Medium",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Medium";
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SeverityOption(
-                          label: "High",
-                          isSelected: selectedSeverity == "High",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "High";
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Urgent",
-                          isSelected: selectedSeverity == "Urgent",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Urgent";
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -156,7 +88,10 @@ class _ReportStep4State extends State<ReportStep4> {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Go to Step 5
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ReportStep5()),
+                      );
                     },
                     child: const Text("Continue"),
                   ),
