@@ -36,7 +36,6 @@ class AuthApiModel {
   // toJSON
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
-      // Backend expects `fullName` (not `name`) in SajiloFix.
       'fullName': fullName,
       'email': email,
       'phone': phone,

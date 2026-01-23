@@ -1,9 +1,9 @@
 import 'package:sajilofix/core/api/api_config.dart';
 import 'package:sajilofix/core/api/api_paths.dart';
 
-/// - `ApiPaths` owns the raw route strings.
-/// - `ApiEndpoints` exposes a single place for client code to read base URL,
-///   timeouts, and endpoint constants.
+// - `ApiPaths` owns the raw route strings.
+// - `ApiEndpoints` exposes a single place for client code to read base URL,
+//   timeouts, and endpoint constants.
 class ApiEndpoints {
   ApiEndpoints._();
 

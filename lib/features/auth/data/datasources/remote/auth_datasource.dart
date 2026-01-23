@@ -43,13 +43,16 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
 
       final data = _asJsonMap(response.data);
 
-      final token = (data['token'] ?? '').toString();
-      final userJson = data['user'];
-      if (userJson is! Map) {
-        throw ApiException.fromError('Missing user in login response');
+      final token = _readString(data, ['token', 'data.token', 'result.token']);
+
+      final userMap = _extractUserMap(data);
+      if (userMap == null) {
+        throw ApiException.fromError(
+          'Missing user in login response (keys: ${data.keys.toList()})',
+        );
       }
 
-      final user = AuthApiModel.fromJSON(Map<String, dynamic>.from(userJson));
+      final user = AuthApiModel.fromJSON(userMap);
 
       // Save minimal session info (existing app behavior)
       await UserSessionService.setCurrentUserEmail(user.email);
@@ -77,16 +80,38 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
       );
 
       final data = _asJsonMap(response.data);
-      final userJson = data['user'];
-      if (userJson is! Map) {
-        throw ApiException.fromError('Missing user in register response');
+
+      final userMap = _extractUserMap(data);
+      if (userMap != null) {
+        return AuthApiModel.fromJSON(userMap);
       }
 
-      final registeredUser = AuthApiModel.fromJSON(
-        Map<String, dynamic>.from(userJson),
+      // Some backends return only `{message}` or an id on register.
+      // If the backend accepted the request (2xx) but omitted `user`, treat it as success
+      // and return the submitted user (with id if present).
+      final id = _readString(data, [
+        '_id',
+        'id',
+        'userId',
+        'data._id',
+        'data.id',
+      ]);
+      return AuthApiModel(
+        id: id.trim().isEmpty ? null : id,
+        fullName: (payload['fullName'] ?? user.fullName).toString(),
+        email: (payload['email'] ?? user.email).toString(),
+        phone: payload['phone']?.toString() ?? user.phone,
+        password: user.password,
+        roleIndex: user.roleIndex,
+        dob: payload['dob']?.toString() ?? user.dob,
+        citizenshipNumber:
+            payload['citizenshipNumber']?.toString() ?? user.citizenshipNumber,
+        district: payload['district']?.toString() ?? user.district,
+        municipality: payload['municipality']?.toString() ?? user.municipality,
+        ward: payload['ward']?.toString() ?? user.ward,
+        tole: payload['tole']?.toString() ?? user.tole,
+        createdAt: DateTime.now(),
       );
-
-      return registeredUser;
     } on DioException catch (e) {
       throw _toApiException(e);
     } catch (e) {
@@ -179,9 +204,61 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     if (data is Map<String, dynamic>) return data;
     if (data is Map) return Map<String, dynamic>.from(data);
 
+    if (data is String) {
+      final decoded = _tryDecodeJson(data);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    }
+
     throw ApiException.fromError(
       'Unexpected response type: ${data.runtimeType}',
     );
+  }
+
+  Map<String, dynamic>? _extractUserMap(Map<String, dynamic> data) {
+    final direct = data['user'];
+    if (direct is Map) return Map<String, dynamic>.from(direct);
+
+    final containerKeys = ['data', 'result', 'payload'];
+    for (final key in containerKeys) {
+      final container = data[key];
+      if (container is Map) {
+        // Some backends return the user object directly as `data`/`result`.
+        // Example: { success, message, token, data: { ...user... } }
+        // In that case there is no nested `user` key.
+
+        final user = container['user'];
+        if (user is Map) return Map<String, dynamic>.from(user);
+
+        return Map<String, dynamic>.from(container);
+      }
+    }
+
+    return null;
+  }
+
+  String _readString(Map<String, dynamic> data, List<String> paths) {
+    for (final path in paths) {
+      final value = _readPath(data, path);
+      if (value == null) continue;
+      final s = value.toString();
+      if (s.trim().isNotEmpty) return s;
+    }
+    return '';
+  }
+
+  Object? _readPath(Map<String, dynamic> data, String path) {
+    if (!path.contains('.')) return data[path];
+
+    Object? current = data;
+    for (final part in path.split('.')) {
+      if (current is Map) {
+        current = current[part];
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 
   Object? _tryDecodeJson(String body) {
