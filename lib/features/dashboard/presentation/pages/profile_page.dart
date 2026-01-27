@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/core/services/app_permissions.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
@@ -24,6 +25,71 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _biometricLock = false;
   bool _autoLogout = false;
+
+  Future<void> _pickProfilePhoto() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: const Text('Take Photo'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+
+                  final rootContext = context;
+                  final ok = await AppPermissions.ensureCamera(rootContext);
+                  if (!rootContext.mounted) return;
+                  if (!ok) return;
+
+                  showMySnackBar(
+                    context: rootContext,
+                    message: 'Camera permission granted.',
+                    icon: Icons.check_circle_outline,
+                  );
+
+                  showMySnackBar(
+                    context: rootContext,
+                    message: 'Upload photo not implemented yet',
+                    icon: Icons.info_outline,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+
+                  final rootContext = context;
+                  final ok = await AppPermissions.ensurePhotos(rootContext);
+                  if (!rootContext.mounted) return;
+                  if (!ok) return;
+
+                  showMySnackBar(
+                    context: rootContext,
+                    message: 'Photos permission granted.',
+                    icon: Icons.check_circle_outline,
+                  );
+
+                  showMySnackBar(
+                    context: rootContext,
+                    message: 'Upload photo not implemented yet',
+                    icon: Icons.info_outline,
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _logout() async {
     try {
@@ -198,12 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     initials: _initials(user.fullName),
                     fullName: user.fullName.isEmpty ? 'User' : user.fullName,
                     email: user.email,
-                    onPickPhoto: () {
-                      showMySnackBar(
-                        context: context,
-                        message: 'Upload photo not implemented yet',
-                      );
-                    },
+                    onPickPhoto: _pickProfilePhoto,
                   ),
                   const SizedBox(height: 16),
                   _QuickActionsGrid(

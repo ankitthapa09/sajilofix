@@ -52,5 +52,13 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app needs access to your local network to connect to the SajiloFix backend running on your computer.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access so you can take photos for reports.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access so you can attach images from your gallery.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need permission to save photos to your library when needed.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to help accurately report where the issue is.</string>
 </dict>
 </plist>

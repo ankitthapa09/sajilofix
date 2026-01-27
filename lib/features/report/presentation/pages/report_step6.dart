@@ -287,7 +287,9 @@ class _ReviewSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.outlineVariant.withOpacity(0.35)),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.35),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,10 +344,12 @@ class _PhotoTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: scheme.outlineVariant.withOpacity(0.35)),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.35),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 10),
           ),
@@ -359,12 +363,12 @@ class _PhotoTile extends StatelessWidget {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withOpacity(0.6),
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.image_outlined,
-                color: scheme.onSurface.withOpacity(0.55),
+                color: scheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
           ),
@@ -403,7 +407,7 @@ class _UrgencyIcon extends StatelessWidget {
       width: 34,
       height: 34,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color, size: 18),

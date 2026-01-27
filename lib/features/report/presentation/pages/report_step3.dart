@@ -7,6 +7,7 @@ import 'package:sajilofix/features/report/presentation/widgets/navigation/report
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
+import 'package:sajilofix/core/services/app_permissions.dart';
 
 class ReportStep3 extends ConsumerStatefulWidget {
   const ReportStep3({super.key});
@@ -67,7 +68,18 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
             const SizedBox(height: 16),
 
             OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                final ok = await AppPermissions.ensureLocationWhenInUse(
+                  context,
+                );
+                if (!ok || !context.mounted) return;
+
+                showMySnackBar(
+                  context: context,
+                  message: 'Location permission granted.',
+                  icon: Icons.check_circle_outline,
+                );
+              },
               icon: const Icon(Icons.my_location),
               label: const Text("Use Current Location"),
               style: OutlinedButton.styleFrom(

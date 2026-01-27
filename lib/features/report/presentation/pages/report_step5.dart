@@ -199,14 +199,14 @@ class _UrgencyCard extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     final Color effectiveBackground = selected
-        ? Color.alphaBlend(border.withOpacity(0.10), background)
+        ? Color.alphaBlend(border.withValues(alpha: 0.10), background)
         : background;
     final Color effectiveBorder = selected
         ? border
-        : scheme.outlineVariant.withOpacity(0.25);
+        : scheme.outlineVariant.withValues(alpha: 0.25);
     final Color iconBg = selected
-        ? border.withOpacity(0.14)
-        : Colors.white.withOpacity(0.85);
+        ? border.withValues(alpha: 0.14)
+        : Colors.white.withValues(alpha: 0.85);
 
     return InkWell(
       onTap: onTap,
@@ -260,7 +260,7 @@ class _UrgencyCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurface.withOpacity(0.68),
+                      color: scheme.onSurface.withValues(alpha: 0.68),
                     ),
                   ),
                 ],
