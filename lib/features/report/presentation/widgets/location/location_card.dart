@@ -21,12 +21,15 @@ class LocationCard extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 Text(subtitle, style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),
-          TextButton(onPressed: () {}, child: Text("edit")),
+          TextButton(onPressed: () {}, child: const Text('edit')),
         ],
       ),
     );

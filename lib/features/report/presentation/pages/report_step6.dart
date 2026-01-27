@@ -1,28 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
-import 'package:sajilofix/core/widgets/report_app_bar.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep6 extends StatelessWidget {
-  final String? category;
-  final String? location;
-  final String? landmark;
-  final String? issueTitle;
-  final String? issueDescription;
-  final String? urgency;
+class ReportStep6 extends ConsumerStatefulWidget {
+  const ReportStep6({super.key});
 
-  const ReportStep6({
-    super.key,
-    this.category,
-    this.location,
-    this.landmark,
-    this.issueTitle,
-    this.issueDescription,
-    this.urgency,
-  });
+  @override
+  ConsumerState<ReportStep6> createState() => _ReportStep6State();
+}
+
+class _ReportStep6State extends ConsumerState<ReportStep6> {
+  void _popToNamedOrCount(String routeName, int countFallback) {
+    final navigator = Navigator.of(context);
+
+    // Try named-route pop first.
+    var popped = false;
+    navigator.popUntil((route) {
+      if (route.settings.name == routeName) {
+        popped = true;
+        return true;
+      }
+      return false;
+    });
+
+    // If route names weren't present (or Step1 is not a route), fallback.
+    if (!popped) {
+      _popSteps(context, countFallback);
+    }
+  }
+
+  List<String> _missingRequiredFields() {
+    final draft = ref.read(reportFormDraftProvider);
+    final missing = <String>[];
+
+    if ((draft.category ?? '').trim().isEmpty) missing.add('Category');
+    if ((draft.locationTitle ?? '').trim().isEmpty) missing.add('Location');
+    if ((draft.locationSubtitle ?? '').trim().isEmpty) {
+      missing.add('Location details');
+    }
+    if ((draft.landmark ?? '').trim().isEmpty) missing.add('Landmark');
+    if ((draft.issueTitle ?? '').trim().isEmpty) missing.add('Issue title');
+    if ((draft.issueDescription ?? '').trim().isEmpty) {
+      missing.add('Issue description');
+    }
+    if ((draft.urgency ?? '').trim().isEmpty) missing.add('Urgency');
+
+    return missing;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final draft = ref.watch(reportFormDraftProvider);
+
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       body: Column(
@@ -56,9 +90,12 @@ class ReportStep6 extends StatelessWidget {
 
                   _ReviewSection(
                     title: 'Category',
-                    onEdit: () => _popSteps(context, 5),
+                    onEdit: () =>
+                        Navigator.of(context).popUntil((r) => r.isFirst),
                     child: Text(
-                      category ?? 'Not selected',
+                      (draft.category ?? '').trim().isEmpty
+                          ? 'Not selected'
+                          : draft.category!.trim(),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -69,21 +106,31 @@ class ReportStep6 extends StatelessWidget {
 
                   _ReviewSection(
                     title: 'Location',
-                    onEdit: () => _popSteps(context, 3),
+                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step3, 3),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          location ?? 'Not selected',
+                          (draft.locationTitle ?? '').trim().isEmpty
+                              ? 'Not selected'
+                              : draft.locationTitle!.trim(),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if ((landmark ?? '').trim().isNotEmpty) ...[
+                        if ((draft.locationSubtitle ?? '').trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              draft.locationSubtitle!.trim(),
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        if ((draft.landmark ?? '').trim().isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
-                            'Near: ${landmark!.trim()}',
+                            'Near: ${draft.landmark!.trim()}',
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
@@ -94,14 +141,14 @@ class ReportStep6 extends StatelessWidget {
 
                   _ReviewSection(
                     title: 'Issue Details',
-                    onEdit: () => _popSteps(context, 2),
+                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step4, 2),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          (issueTitle ?? '').trim().isEmpty
+                          (draft.issueTitle ?? '').trim().isEmpty
                               ? 'No title'
-                              : issueTitle!.trim(),
+                              : draft.issueTitle!.trim(),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -109,9 +156,9 @@ class ReportStep6 extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          (issueDescription ?? '').trim().isEmpty
+                          (draft.issueDescription ?? '').trim().isEmpty
                               ? 'No description'
-                              : issueDescription!.trim(),
+                              : draft.issueDescription!.trim(),
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ],
@@ -121,27 +168,27 @@ class ReportStep6 extends StatelessWidget {
 
                   _ReviewSection(
                     title: 'Photos',
-                    onEdit: () => _popSteps(context, 4),
+                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step2, 4),
                     child: Row(children: [_PhotoTile(label: 'Photo 1')]),
                   ),
                   const SizedBox(height: 14),
 
                   _ReviewSection(
                     title: 'Urgency Level',
-                    onEdit: () => _popSteps(context, 1),
+                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step5, 1),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _UrgencyIcon(urgency: urgency),
+                        _UrgencyIcon(urgency: draft.urgency),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                (urgency ?? '').trim().isEmpty
+                                (draft.urgency ?? '').trim().isEmpty
                                     ? 'Not selected'
-                                    : urgency!.trim(),
+                                    : draft.urgency!.trim(),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -149,7 +196,7 @@ class ReportStep6 extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                _urgencySubtitle(urgency),
+                                _urgencySubtitle(draft.urgency),
                                 style: const TextStyle(color: Colors.grey),
                               ),
                             ],
@@ -171,8 +218,22 @@ class ReportStep6 extends StatelessWidget {
             child: GradientElevatedButton(
               text: 'Submit Report',
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Submitted (UI only for now).')),
+                final missing = _missingRequiredFields();
+                if (missing.isNotEmpty) {
+                  showMySnackBar(
+                    context: context,
+                    message:
+                        'Please complete: ${missing.take(2).join(', ')}${missing.length > 2 ? '…' : ''}',
+                    isError: true,
+                    icon: Icons.info_outline,
+                  );
+                  return;
+                }
+
+                showMySnackBar(
+                  context: context,
+                  message: 'Submitted (UI only for now).',
+                  icon: Icons.check_circle_outline,
                 );
               },
             ),

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step3.dart';
-import 'package:sajilofix/core/widgets/add_photo_card.dart';
-import 'package:sajilofix/core/widgets/empty_photo_state.dart';
-import 'package:sajilofix/core/widgets/report_app_bar.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/media/add_photo_card.dart';
+import 'package:sajilofix/features/report/presentation/widgets/media/empty_photo_state.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep2 extends StatelessWidget {
+class ReportStep2 extends ConsumerStatefulWidget {
   const ReportStep2({super.key});
 
+  @override
+  ConsumerState<ReportStep2> createState() => _ReportStep2State();
+}
+
+class _ReportStep2State extends ConsumerState<ReportStep2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +58,12 @@ class ReportStep2 extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ReportStep3()),
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: ReportRouteNames.step3,
+                      ),
+                      builder: (context) => const ReportStep3(),
+                    ),
                   );
                 },
                 child: const Text("Continue"),

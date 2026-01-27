@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/core/widgets/report_app_bar.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step6.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep5 extends StatefulWidget {
+class ReportStep5 extends ConsumerStatefulWidget {
   const ReportStep5({super.key});
 
   @override
-  State<ReportStep5> createState() => _ReportStep5State();
+  ConsumerState<ReportStep5> createState() => _ReportStep5State();
 }
 
-class _ReportStep5State extends State<ReportStep5> {
-  String _selected = 'Low Priority';
+class _ReportStep5State extends ConsumerState<ReportStep5> {
+  late String _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final draft = ref.read(reportFormDraftProvider);
+    _selected = (draft.urgency ?? '').trim();
+  }
+
+  void _select(String value) {
+    ref.read(reportFormDraftProvider.notifier).setUrgency(value);
+    setState(() => _selected = value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +71,18 @@ class _ReportStep5State extends State<ReportStep5> {
                     background: const Color(0xFFEAF2FF),
                     border: const Color(0xFF3A6ACA),
                     selected: _selected == 'Low Priority',
-                    onTap: () => setState(() => _selected = 'Low Priority'),
+                    onTap: () => _select('Low Priority'),
                   ),
                   const SizedBox(height: 14),
                   _UrgencyCard(
                     title: 'Medium Priority',
                     subtitle:
-                        'Moderate issue requiring attention within a few days',
+                        'Issue that should be handled soon but isn\'t an emergency',
                     icon: Icons.error_outline,
                     background: const Color(0xFFFFF7DC),
                     border: const Color(0xFFB07B00),
                     selected: _selected == 'Medium Priority',
-                    onTap: () => setState(() => _selected = 'Medium Priority'),
+                    onTap: () => _select('Medium Priority'),
                   ),
                   const SizedBox(height: 14),
                   _UrgencyCard(
@@ -77,24 +92,22 @@ class _ReportStep5State extends State<ReportStep5> {
                     background: const Color(0xFFFFEEE5),
                     border: const Color(0xFFEB6A2A),
                     selected: _selected == 'High Priority',
-                    onTap: () => setState(() => _selected = 'High Priority'),
+                    onTap: () => _select('High Priority'),
                   ),
                   const SizedBox(height: 14),
                   _UrgencyCard(
                     title: 'Urgent',
                     subtitle:
-                        'Critical issue posing immediate safety or health risk',
+                        'Critical issue requiring immediate attention for safety/health',
                     icon: Icons.report_gmailerrorred_outlined,
                     background: const Color(0xFFFFE8E8),
                     border: const Color(0xFFE53935),
                     selected: _selected == 'Urgent',
-                    onTap: () => setState(() => _selected = 'Urgent'),
+                    onTap: () => _select('Urgent'),
                   ),
 
                   const SizedBox(height: 18),
-
                   Container(
-                    width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEAF2FF),
@@ -128,14 +141,22 @@ class _ReportStep5State extends State<ReportStep5> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ReportStep6(urgency: _selected),
-                        ),
-                      );
-                    },
+                    onPressed: _selected.trim().isEmpty
+                        ? null
+                        : () {
+                            ref
+                                .read(reportFormDraftProvider.notifier)
+                                .setUrgency(_selected);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                settings: const RouteSettings(
+                                  name: ReportRouteNames.step6,
+                                ),
+                                builder: (context) => const ReportStep6(),
+                              ),
+                            );
+                          },
                     child: const Text('Continue'),
                   ),
                 ),

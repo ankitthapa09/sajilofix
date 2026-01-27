@@ -21,7 +21,7 @@ class AddPhotoCard extends StatelessWidget {
         children: const [
           Icon(Icons.camera_alt, size: 30, color: Colors.grey),
           SizedBox(height: 8),
-          Text("Add Photo", style: TextStyle(color: Colors.grey)),
+          Text('Add Photo', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

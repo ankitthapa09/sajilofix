@@ -22,9 +22,7 @@ class ReportCategoryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color.fromARGB(255, 43, 78, 255).withValues(
-                  alpha: 0.1,
-                ) // Add background color when selected
+              ? const Color.fromARGB(255, 43, 78, 255).withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -37,12 +35,7 @@ class ReportCategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              iconpath,
-              width: 60,
-              height: 60,
-              // color: isSelected ? Colors.blue : Colors.black87,
-            ),
+            Image.asset(iconpath, width: 60, height: 60),
             const SizedBox(height: 12),
             Text(
               title,

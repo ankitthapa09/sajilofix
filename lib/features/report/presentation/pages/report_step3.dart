@@ -1,14 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step4.dart';
-import 'package:sajilofix/core/widgets/location_card.dart';
-import 'package:sajilofix/core/widgets/map_placeholder.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/location/location_card.dart';
+import 'package:sajilofix/features/report/presentation/widgets/location/map_placeholder.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep3 extends StatelessWidget {
+class ReportStep3 extends ConsumerStatefulWidget {
   const ReportStep3({super.key});
 
   @override
+  ConsumerState<ReportStep3> createState() => _ReportStep3State();
+}
+
+class _ReportStep3State extends ConsumerState<ReportStep3> {
+  late final TextEditingController _landmarkController;
+
+  @override
+  void initState() {
+    super.initState();
+    _landmarkController = TextEditingController(
+      text: ref.read(reportFormDraftProvider).landmark,
+    );
+  }
+
+  @override
+  void dispose() {
+    _landmarkController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    const locationTitle = "Kathmandu Metropolitan City";
+    const locationSubtitle = "Kathmandu";
+
     return Scaffold(
       appBar: AppBar(leading: BackButton(), title: const Text("Report Screen")),
       body: Padding(
@@ -60,8 +88,10 @@ class ReportStep3 extends StatelessWidget {
             const SizedBox(height: 16),
 
             TextField(
+              controller: _landmarkController,
               decoration: const InputDecoration(
-                hintText: "Add landmark or specific address (optional)",
+                labelText: 'Landmark *',
+                hintText: 'Enter a nearby landmark or address',
               ),
             ),
 
@@ -72,9 +102,33 @@ class ReportStep3 extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
+                  final landmark = _landmarkController.text.trim();
+                  if (landmark.isEmpty) {
+                    showMySnackBar(
+                      context: context,
+                      message: 'Please enter a landmark to continue.',
+                      isError: true,
+                      icon: Icons.info_outline,
+                    );
+                    return;
+                  }
+
+                  ref
+                      .read(reportFormDraftProvider.notifier)
+                      .setLocation(
+                        title: locationTitle,
+                        subtitle: locationSubtitle,
+                        landmark: landmark,
+                      );
+
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ReportStep4()),
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: ReportRouteNames.step4,
+                      ),
+                      builder: (context) => const ReportStep4(),
+                    ),
                   );
                 },
                 child: const Text("Continue"),

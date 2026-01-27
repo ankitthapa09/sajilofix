@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step5.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep4 extends StatefulWidget {
+class ReportStep4 extends ConsumerStatefulWidget {
   const ReportStep4({super.key});
 
   @override
-  State<ReportStep4> createState() => _ReportStep4State();
+  ConsumerState<ReportStep4> createState() => _ReportStep4State();
 }
 
-class _ReportStep4State extends State<ReportStep4> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+class _ReportStep4State extends ConsumerState<ReportStep4> {
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    final draft = ref.read(reportFormDraftProvider);
+    titleController = TextEditingController(text: draft.issueTitle);
+    descriptionController = TextEditingController(text: draft.issueDescription);
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +107,42 @@ class _ReportStep4State extends State<ReportStep4> {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: () {
+                      final title = titleController.text.trim();
+                      final description = descriptionController.text.trim();
+                      if (title.isEmpty) {
+                        showMySnackBar(
+                          context: context,
+                          message: 'Issue title is required.',
+                          isError: true,
+                          icon: Icons.info_outline,
+                        );
+                        return;
+                      }
+                      if (description.isEmpty) {
+                        showMySnackBar(
+                          context: context,
+                          message: 'Detailed description is required.',
+                          isError: true,
+                          icon: Icons.info_outline,
+                        );
+                        return;
+                      }
+
+                      ref
+                          .read(reportFormDraftProvider.notifier)
+                          .setIssueDetails(
+                            title: title,
+                            description: description,
+                          );
+
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ReportStep5()),
+                        MaterialPageRoute(
+                          settings: const RouteSettings(
+                            name: ReportRouteNames.step5,
+                          ),
+                          builder: (context) => const ReportStep5(),
+                        ),
                       );
                     },
                     child: const Text("Continue"),
