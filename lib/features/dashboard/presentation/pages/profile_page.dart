@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
@@ -16,6 +18,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   int _tabIndex = 0; // 0 Profile, 1 Notifications, 2 Privacy, 3 Security
 
+  Uint8List? _profileImageBytes;
+
   bool _pushNotifications = true;
   bool _emailNotifications = false;
   bool _smsNotifications = false;
@@ -25,6 +29,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _biometricLock = false;
   bool _autoLogout = false;
+
+  Future<void> _pickAndSetProfileImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final file = await picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1200,
+      );
+
+      if (!mounted) return;
+
+      if (file == null) {
+        showMySnackBar(
+          context: context,
+          message: 'No image selected.',
+          icon: Icons.info_outline,
+        );
+        return;
+      }
+
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+
+      setState(() => _profileImageBytes = bytes);
+      showMySnackBar(
+        context: context,
+        message: 'Profile photo updated.',
+        icon: Icons.check_circle_outline,
+      );
+    } on MissingPluginException {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message:
+            'Photo picking is not available on this platform/build. Please run on Android/iOS and rebuild.',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: e.message ?? 'Unable to open camera/gallery.',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: 'Failed to pick image: $e',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    }
+  }
 
   Future<void> _pickProfilePhoto() async {
     await showModalBottomSheet<void>(
@@ -46,17 +107,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   if (!rootContext.mounted) return;
                   if (!ok) return;
 
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Camera permission granted.',
-                    icon: Icons.check_circle_outline,
-                  );
-
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Upload photo not implemented yet',
-                    icon: Icons.info_outline,
-                  );
+                  await _pickAndSetProfileImage(ImageSource.camera);
                 },
               ),
               ListTile(
@@ -70,17 +121,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   if (!rootContext.mounted) return;
                   if (!ok) return;
 
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Photos permission granted.',
-                    icon: Icons.check_circle_outline,
-                  );
-
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Upload photo not implemented yet',
-                    icon: Icons.info_outline,
-                  );
+                  await _pickAndSetProfileImage(ImageSource.gallery);
                 },
               ),
               const SizedBox(height: 8),
@@ -264,6 +305,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     initials: _initials(user.fullName),
                     fullName: user.fullName.isEmpty ? 'User' : user.fullName,
                     email: user.email,
+                    photoBytes: _profileImageBytes,
                     onPickPhoto: _pickProfilePhoto,
                   ),
                   const SizedBox(height: 16),
@@ -320,12 +362,14 @@ class _ProfileHeaderCard extends StatelessWidget {
   final String initials;
   final String fullName;
   final String email;
+  final Uint8List? photoBytes;
   final VoidCallback onPickPhoto;
 
   const _ProfileHeaderCard({
     required this.initials,
     required this.fullName,
     required this.email,
+    required this.photoBytes,
     required this.onPickPhoto,
   });
 
@@ -353,13 +397,22 @@ class _ProfileHeaderCard extends StatelessWidget {
                   color: theme.colorScheme.primaryContainer,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
+                child: (photoBytes == null)
+                    ? Text(
+                        initials,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      )
+                    : ClipOval(
+                        child: Image.memory(
+                          photoBytes!,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               ),
               Positioned(
                 right: -2,
