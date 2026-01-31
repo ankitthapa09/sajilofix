@@ -8,6 +8,8 @@ class AuthApiModel {
   final String? password;
   final int roleIndex;
 
+  final String? profilePhoto;
+
   final String? dob;
   final String? citizenshipNumber;
   final String? district;
@@ -24,6 +26,7 @@ class AuthApiModel {
     this.phone,
     this.password,
     required this.roleIndex,
+    this.profilePhoto,
     this.dob,
     this.citizenshipNumber,
     this.district,
@@ -36,7 +39,6 @@ class AuthApiModel {
   // toJSON
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
-      // Backend expects `fullName` (not `name`) in SajiloFix.
       'fullName': fullName,
       'email': email,
       'phone': phone,
@@ -64,11 +66,12 @@ class AuthApiModel {
       email: email,
       phone: (json['phone'] ?? json['phoneNumber'])?.toString(),
       roleIndex: _parseRoleIndex(json, email: email),
+      profilePhoto: json['profilePhoto']?.toString(),
       dob: json['dob']?.toString(),
       citizenshipNumber: json['citizenshipNumber']?.toString(),
       district: json['district']?.toString(),
       municipality: json['municipality']?.toString(),
-      ward: json['ward']?.toString(),
+      ward: (json['ward'] ?? json['wardNumber'])?.toString(),
       tole: json['tole']?.toString(),
       createdAt: _tryParseDateTime(json['createdAt']),
     );
@@ -81,6 +84,7 @@ class AuthApiModel {
       fullName: fullName,
       phone: phone ?? '',
       roleIndex: roleIndex,
+      profilePhoto: _nullIfBlank(profilePhoto),
       dob: _nullIfBlank(dob),
       citizenshipNumber: _nullIfBlank(citizenshipNumber),
       district: _nullIfBlank(district),
@@ -99,6 +103,7 @@ class AuthApiModel {
       phone: entity.phone,
       password: password,
       roleIndex: entity.roleIndex,
+      profilePhoto: entity.profilePhoto,
       dob: entity.dob,
       citizenshipNumber: entity.citizenshipNumber,
       district: entity.district,

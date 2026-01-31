@@ -21,11 +21,11 @@ class ReportProgressBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Step $currentStep of $totalSteps",
+              'Step $currentStep of $totalSteps',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             Text(
-              "${(progress * 100).round()}%",
+              '${(progress * 100).round()}%',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -37,8 +37,8 @@ class ReportProgressBar extends StatelessWidget {
             value: progress,
             minHeight: 8,
             backgroundColor: const Color.fromARGB(255, 195, 214, 245),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              const Color.fromARGB(255, 58, 106, 202),
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              Color.fromARGB(255, 58, 106, 202),
             ),
           ),
         ),

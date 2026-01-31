@@ -130,13 +130,19 @@ class ApiClient {
   Future<Response> uploadFile(
     String path, {
     required FormData formData,
+    String method = 'POST',
     Options? options,
     ProgressCallback? onSendProgress,
   }) async {
-    return _dio.post(
+    final mergedOptions = (options ?? Options()).copyWith(
+      method: method,
+      contentType: 'multipart/form-data',
+    );
+
+    return _dio.request(
       path,
       data: formData,
-      options: options,
+      options: mergedOptions,
       onSendProgress: onSendProgress,
     );
   }

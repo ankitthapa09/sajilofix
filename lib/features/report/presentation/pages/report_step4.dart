@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
-import 'package:sajilofix/core/widgets/severity_option.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/pages/report_step5.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep4 extends StatefulWidget {
+class ReportStep4 extends ConsumerStatefulWidget {
   const ReportStep4({super.key});
 
   @override
-  State<ReportStep4> createState() => _ReportStep4State();
+  ConsumerState<ReportStep4> createState() => _ReportStep4State();
 }
 
-class _ReportStep4State extends State<ReportStep4> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+class _ReportStep4State extends ConsumerState<ReportStep4> {
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
 
-  String selectedSeverity = "Medium";
+  @override
+  void initState() {
+    super.initState();
+    final draft = ref.read(reportFormDraftProvider);
+    titleController = TextEditingController(text: draft.issueTitle);
+    descriptionController = TextEditingController(text: draft.issueDescription);
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,72 +92,6 @@ class _ReportStep4State extends State<ReportStep4> {
                           "Describe the issue in detail... What is the problem? When did you notice it?",
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "How severe is this issue?",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Low",
-                          isSelected: selectedSeverity == "Low",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Low";
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Medium",
-                          isSelected: selectedSeverity == "Medium",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Medium";
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SeverityOption(
-                          label: "High",
-                          isSelected: selectedSeverity == "High",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "High";
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SeverityOption(
-                          label: "Urgent",
-                          isSelected: selectedSeverity == "Urgent",
-                          onTap: () {
-                            setState(() {
-                              selectedSeverity = "Urgent";
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -156,7 +107,43 @@ class _ReportStep4State extends State<ReportStep4> {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Go to Step 5
+                      final title = titleController.text.trim();
+                      final description = descriptionController.text.trim();
+                      if (title.isEmpty) {
+                        showMySnackBar(
+                          context: context,
+                          message: 'Issue title is required.',
+                          isError: true,
+                          icon: Icons.info_outline,
+                        );
+                        return;
+                      }
+                      if (description.isEmpty) {
+                        showMySnackBar(
+                          context: context,
+                          message: 'Detailed description is required.',
+                          isError: true,
+                          icon: Icons.info_outline,
+                        );
+                        return;
+                      }
+
+                      ref
+                          .read(reportFormDraftProvider.notifier)
+                          .setIssueDetails(
+                            title: title,
+                            description: description,
+                          );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          settings: const RouteSettings(
+                            name: ReportRouteNames.step5,
+                          ),
+                          builder: (context) => const ReportStep5(),
+                        ),
+                      );
                     },
                     child: const Text("Continue"),
                   ),

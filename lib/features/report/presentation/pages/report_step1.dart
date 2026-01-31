@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step2.dart';
-import 'package:sajilofix/core/widgets/report_category_card.dart';
-import 'package:sajilofix/core/widgets/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/widgets/report_category_card.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 
-class ReportStep1 extends StatefulWidget {
+class ReportStep1 extends ConsumerStatefulWidget {
   const ReportStep1({super.key});
 
   @override
-  State<ReportStep1> createState() => _ReportStep1State();
+  ConsumerState<ReportStep1> createState() => _ReportStep1State();
 }
 
-class _ReportStep1State extends State<ReportStep1> {
+class _ReportStep1State extends ConsumerState<ReportStep1> {
   int selectedIndex = -1;
 
   final List<Map<String, dynamic>> categories = [
@@ -22,6 +25,19 @@ class _ReportStep1State extends State<ReportStep1> {
     {"icon": "assets/icons/constructor.png", "title": "Public Infrastructure"},
     {"icon": "assets/icons/other-issues.png", "title": "Other"},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final selectedCategory = ref.read(reportFormDraftProvider).category;
+    if (selectedCategory == null) return;
+    final index = categories.indexWhere(
+      (e) => (e['title'] as String?) == selectedCategory,
+    );
+    if (index >= 0) {
+      selectedIndex = index;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +88,9 @@ class _ReportStep1State extends State<ReportStep1> {
                     title: item["title"],
                     isSelected: selectedIndex == index,
                     onTap: () {
+                      ref
+                          .read(reportFormDraftProvider.notifier)
+                          .setCategory(item["title"] as String);
                       setState(() {
                         selectedIndex = index;
                       });
@@ -89,10 +108,19 @@ class _ReportStep1State extends State<ReportStep1> {
                 onPressed: selectedIndex == -1
                     ? null
                     : () {
+                        final selectedCategoryTitle =
+                            categories[selectedIndex]["title"] as String;
+                        ref
+                            .read(reportFormDraftProvider.notifier)
+                            .setCategory(selectedCategoryTitle);
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ReportStep2(),
+                            settings: const RouteSettings(
+                              name: ReportRouteNames.step2,
+                            ),
+                            builder: (context) => const ReportStep2(),
                           ),
                         );
                       },

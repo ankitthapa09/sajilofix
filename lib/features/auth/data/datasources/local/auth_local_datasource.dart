@@ -25,6 +25,7 @@ class AuthLocalDataSource {
     String? municipality,
     String? ward,
     String? tole,
+    String? profilePhoto,
   }) async {
     final normalizedEmail = email.trim().toLowerCase();
 
@@ -51,6 +52,9 @@ class AuthLocalDataSource {
       ward: (ward ?? '').trim().isEmpty ? null : ward?.trim(),
       tole: (tole ?? '').trim().isEmpty ? null : tole?.trim(),
       createdAt: DateTime.now(),
+      profilePhoto: (profilePhoto ?? '').trim().isEmpty
+          ? null
+          : profilePhoto?.trim(),
     );
 
     await box.put(normalizedEmail, user);
@@ -68,6 +72,7 @@ class AuthLocalDataSource {
     String? municipality,
     String? ward,
     String? tole,
+    String? profilePhoto,
     DateTime? createdAt,
   }) async {
     final normalizedEmail = email.trim().toLowerCase();
@@ -91,6 +96,53 @@ class AuthLocalDataSource {
       ward: (ward ?? '').trim().isEmpty ? null : ward?.trim(),
       tole: (tole ?? '').trim().isEmpty ? null : tole?.trim(),
       createdAt: createdAt ?? existing?.createdAt ?? DateTime.now(),
+      profilePhoto: (profilePhoto ?? '').trim().isEmpty
+          ? null
+          : profilePhoto?.trim(),
+    );
+
+    await box.put(normalizedEmail, user);
+  }
+
+  Future<void> upsertUserPreservePasswordHash({
+    required String fullName,
+    required String email,
+    required String phone,
+    required int roleIndex,
+    String? dob,
+    String? citizenshipNumber,
+    String? district,
+    String? municipality,
+    String? ward,
+    String? tole,
+    String? profilePhoto,
+    DateTime? createdAt,
+  }) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final box = HiveService.usersBox();
+    final existing = box.get(normalizedEmail);
+    if (existing == null) return;
+
+    final user = LocalUser(
+      email: normalizedEmail,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      roleIndex: roleIndex,
+      passwordHash: existing.passwordHash,
+      dob: (dob ?? '').trim().isEmpty ? null : dob?.trim(),
+      citizenshipNumber: (citizenshipNumber ?? '').trim().isEmpty
+          ? null
+          : citizenshipNumber?.trim(),
+      district: (district ?? '').trim().isEmpty ? null : district?.trim(),
+      municipality: (municipality ?? '').trim().isEmpty
+          ? null
+          : municipality?.trim(),
+      ward: (ward ?? '').trim().isEmpty ? null : ward?.trim(),
+      tole: (tole ?? '').trim().isEmpty ? null : tole?.trim(),
+      createdAt: createdAt ?? existing.createdAt,
+      profilePhoto: (profilePhoto ?? '').trim().isEmpty
+          ? null
+          : profilePhoto?.trim(),
     );
 
     await box.put(normalizedEmail, user);

@@ -4,6 +4,8 @@ class AuthUser {
   final String phone;
   final int roleIndex;
 
+  final String? profilePhoto;
+
   final String? dob;
   final String? citizenshipNumber;
   final String? district;
@@ -19,6 +21,7 @@ class AuthUser {
     required this.phone,
     required this.roleIndex,
     required this.createdAt,
+    this.profilePhoto,
     this.dob,
     this.citizenshipNumber,
     this.district,
