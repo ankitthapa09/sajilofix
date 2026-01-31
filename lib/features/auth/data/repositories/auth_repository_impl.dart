@@ -47,6 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
       municipality: remoteUser.municipality,
       ward: remoteUser.ward,
       tole: remoteUser.tole,
+      profilePhoto: remoteUser.profilePhoto,
       createdAt: remoteUser.createdAt,
     );
   }
@@ -172,6 +173,35 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthUser?> getCurrentUser() async {
     final email = UserSessionService.currentUserEmail;
     if ((email ?? '').trim().isEmpty) return null;
+
+    final remote = _remote;
+    if (remote != null) {
+      try {
+        final remoteUser = await remote.getMe();
+        if (remoteUser != null) {
+          await _local.upsertUserPreservePasswordHash(
+            fullName: remoteUser.fullName,
+            email: remoteUser.email,
+            phone: (remoteUser.phone ?? '').trim(),
+            roleIndex: remoteUser.roleIndex,
+            dob: remoteUser.dob,
+            citizenshipNumber: remoteUser.citizenshipNumber,
+            district: remoteUser.district,
+            municipality: remoteUser.municipality,
+            ward: remoteUser.ward,
+            tole: remoteUser.tole,
+            profilePhoto: remoteUser.profilePhoto,
+            createdAt: remoteUser.createdAt,
+          );
+          await UserSessionService.setCurrentUserEmail(remoteUser.email);
+          return remoteUser.toEntity();
+        }
+      } on ApiException {
+        // fall back to local
+      } catch (_) {
+        // fall back to local
+      }
+    }
 
     final user = await _local.getUserByEmail(email!);
     return user?.toEntity();

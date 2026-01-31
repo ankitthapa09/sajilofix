@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/core/api/api_client.dart';
+import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
+import 'package:sajilofix/features/auth/data/datasources/remote/auth_datasource.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -20,6 +24,60 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Uint8List? _profileImageBytes;
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Best-effort refresh so persisted `profilePhoto` shows immediately
+    // even if local cache is stale.
+    Future.microtask(() async {
+      await _syncCurrentUserFromApi();
+      if (!mounted) return;
+      ref.invalidate(currentUserProvider);
+    });
+  }
+
+  Future<void> _syncCurrentUserFromApi() async {
+    try {
+      final remote = ref.read(authRemoteDatasourceProvider);
+      final local = ref.read(authLocalDataSourceProvider);
+
+      final remoteUser = await remote.getMe();
+      if (remoteUser == null) return;
+
+      await local.upsertUserPreservePasswordHash(
+        fullName: remoteUser.fullName,
+        email: remoteUser.email,
+        phone: (remoteUser.phone ?? '').trim(),
+        roleIndex: remoteUser.roleIndex,
+        dob: remoteUser.dob,
+        citizenshipNumber: remoteUser.citizenshipNumber,
+        district: remoteUser.district,
+        municipality: remoteUser.municipality,
+        ward: remoteUser.ward,
+        tole: remoteUser.tole,
+        profilePhoto: remoteUser.profilePhoto,
+        createdAt: remoteUser.createdAt,
+      );
+    } catch (_) {}
+  }
+
+  String? _buildProfilePhotoUrl(String baseUrl, String? profilePhoto) {
+    final rel = (profilePhoto ?? '').trim();
+    if (rel.isEmpty) return null;
+
+    final cleanBase = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final cleanRel = rel.replaceAll(RegExp(r'^/+'), '');
+
+    // In case backend stores `uploads/profile_photos/...` instead of
+    // `profile_photos/...`, avoid double `/uploads/uploads/...`.
+    if (cleanRel.startsWith('uploads/')) {
+      return '$cleanBase/$cleanRel';
+    }
+
+    return '$cleanBase/uploads/$cleanRel';
+  }
+
   bool _pushNotifications = true;
   bool _emailNotifications = false;
   bool _smsNotifications = false;
@@ -29,6 +87,106 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _biometricLock = false;
   bool _autoLogout = false;
+
+  Future<void> _uploadProfilePhoto({
+    required XFile file,
+    required Uint8List bytes,
+  }) async {
+    try {
+      final apiClient = ref.read(apiClientProvider);
+
+      showMySnackBar(
+        context: context,
+        message: 'Uploading profile photo...',
+        icon: Icons.cloud_upload_outlined,
+      );
+
+      final formData = FormData.fromMap({
+        'photo': MultipartFile.fromBytes(
+          bytes,
+          filename: file.name.isNotEmpty ? file.name : 'profile.jpg',
+        ),
+      });
+
+      await apiClient.uploadFile(
+        ApiEndpoints.uploadProfilePhoto,
+        formData: formData,
+        method: 'PUT',
+        options: Options(contentType: 'multipart/form-data'),
+      );
+
+      await _syncCurrentUserFromApi();
+      ref.invalidate(currentUserProvider);
+
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: 'Profile photo uploaded.',
+        icon: Icons.check_circle_outline,
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final serverMessage = (e.response?.data is Map)
+          ? (e.response?.data['message']?.toString())
+          : null;
+      showMySnackBar(
+        context: context,
+        message:
+            serverMessage ?? e.message ?? 'Failed to upload profile photo.',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: 'Failed to upload profile photo: $e',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    }
+  }
+
+  Future<void> _deleteProfilePhoto() async {
+    try {
+      final apiClient = ref.read(apiClientProvider);
+
+      await apiClient.delete(ApiEndpoints.deleteProfilePhoto);
+
+      if (!mounted) return;
+      setState(() => _profileImageBytes = null);
+
+      await _syncCurrentUserFromApi();
+      if (!mounted) return;
+      ref.invalidate(currentUserProvider);
+
+      showMySnackBar(
+        context: context,
+        message: 'Profile photo removed.',
+        icon: Icons.check_circle_outline,
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final serverMessage = (e.response?.data is Map)
+          ? (e.response?.data['message']?.toString())
+          : null;
+      showMySnackBar(
+        context: context,
+        message:
+            serverMessage ?? e.message ?? 'Failed to remove profile photo.',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: 'Failed to remove profile photo: $e',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    }
+  }
 
   Future<void> _pickAndSetProfileImage(ImageSource source) async {
     try {
@@ -54,11 +212,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (!mounted) return;
 
       setState(() => _profileImageBytes = bytes);
-      showMySnackBar(
-        context: context,
-        message: 'Profile photo updated.',
-        icon: Icons.check_circle_outline,
-      );
+
+      await _uploadProfilePhoto(file: file, bytes: bytes);
     } on MissingPluginException {
       if (!mounted) return;
       showMySnackBar(
@@ -298,6 +453,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               };
 
+              final apiBaseUrl = ref
+                  .read(apiClientProvider)
+                  .dio
+                  .options
+                  .baseUrl;
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -306,7 +467,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     fullName: user.fullName.isEmpty ? 'User' : user.fullName,
                     email: user.email,
                     photoBytes: _profileImageBytes,
+                    photoUrl: _profileImageBytes == null
+                        ? _buildProfilePhotoUrl(apiBaseUrl, user.profilePhoto)
+                        : null,
                     onPickPhoto: _pickProfilePhoto,
+                    onRemovePhoto:
+                        (user.profilePhoto ?? '').trim().isEmpty &&
+                            _profileImageBytes == null
+                        ? null
+                        : _deleteProfilePhoto,
                   ),
                   const SizedBox(height: 16),
                   _QuickActionsGrid(
@@ -363,19 +532,85 @@ class _ProfileHeaderCard extends StatelessWidget {
   final String fullName;
   final String email;
   final Uint8List? photoBytes;
+  final String? photoUrl;
   final VoidCallback onPickPhoto;
+  final VoidCallback? onRemovePhoto;
 
   const _ProfileHeaderCard({
     required this.initials,
     required this.fullName,
     required this.email,
     required this.photoBytes,
+    required this.photoUrl,
     required this.onPickPhoto,
+    required this.onRemovePhoto,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    Widget avatarContent() {
+      if (photoBytes != null) {
+        return ClipOval(
+          child: Image.memory(
+            photoBytes!,
+            width: 96,
+            height: 96,
+            fit: BoxFit.cover,
+          ),
+        );
+      }
+
+      final url = (photoUrl ?? '').trim();
+      if (url.isNotEmpty) {
+        return ClipOval(
+          child: Image.network(
+            url,
+            width: 96,
+            height: 96,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) {
+              return Center(
+                child: Text(
+                  initials,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              );
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              final expected = loadingProgress.expectedTotalBytes;
+              final loaded = loadingProgress.cumulativeBytesLoaded;
+              final value = (expected == null || expected == 0)
+                  ? null
+                  : loaded / expected;
+              return Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    value: value,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+      return Text(
+        initials,
+        style: theme.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -397,22 +632,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                   color: theme.colorScheme.primaryContainer,
                 ),
                 alignment: Alignment.center,
-                child: (photoBytes == null)
-                    ? Text(
-                        initials,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      )
-                    : ClipOval(
-                        child: Image.memory(
-                          photoBytes!,
-                          width: 96,
-                          height: 96,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                child: avatarContent(),
               ),
               Positioned(
                 right: -2,
@@ -437,6 +657,30 @@ class _ProfileHeaderCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (onRemovePhoto != null)
+                Positioned(
+                  left: -2,
+                  bottom: -2,
+                  child: InkWell(
+                    onTap: onRemovePhoto,
+                    borderRadius: BorderRadius.circular(999),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.surface,
+                        border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -491,7 +735,7 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _ActionTile(
                 title: 'Report',
-                icon: Icons.camera_alt_rounded,
+                icon: Icons.add_circle_outline_rounded,
                 onTap: onReport,
               ),
             ),

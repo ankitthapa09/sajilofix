@@ -20,4 +20,6 @@ class ApiEndpoints {
   static const String authLogin = ApiPaths.authLogin;
 
   static const String uploadProfilePhoto = ApiPaths.uploadProfilePhoto;
+  static const String getMe = ApiPaths.getMe;
+  static const String deleteProfilePhoto = ApiPaths.deleteProfilePhoto;
 }

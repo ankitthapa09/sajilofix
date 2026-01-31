@@ -40,6 +40,9 @@ class LocalUser extends HiveObject {
   @HiveField(11)
   final DateTime createdAt;
 
+  @HiveField(12)
+  final String? profilePhoto;
+
   LocalUser({
     required this.email,
     required this.fullName,
@@ -47,6 +50,7 @@ class LocalUser extends HiveObject {
     required this.roleIndex,
     required this.passwordHash,
     required this.createdAt,
+    this.profilePhoto,
     this.dob,
     this.citizenshipNumber,
     this.district,

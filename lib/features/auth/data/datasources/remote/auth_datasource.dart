@@ -34,6 +34,23 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
   }
 
   @override
+  Future<AuthApiModel?> getMe() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.getMe);
+      final data = _asJsonMap(response.data);
+
+      final userMap = _extractUserMap(data);
+      if (userMap == null) return null;
+
+      return AuthApiModel.fromJSON(userMap);
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
+  @override
   Future<AuthApiModel?> login(String email, String password) async {
     try {
       final response = await _apiClient.post(

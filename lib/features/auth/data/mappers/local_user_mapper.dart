@@ -8,6 +8,7 @@ extension LocalUserMapper on LocalUser {
       fullName: fullName,
       phone: phone,
       roleIndex: roleIndex,
+      profilePhoto: profilePhoto,
       dob: dob,
       citizenshipNumber: citizenshipNumber,
       district: district,

@@ -52,7 +52,7 @@ class ApiConfig {
   // Fallback IP for physical device if you didn't pass SAJILOFIX_API_HOST.
   static const String _fallbackIpAddress = String.fromEnvironment(
     'SAJILOFIX_FALLBACK_IP',
-    defaultValue: '172.26.18.142',
+    defaultValue: '10.1.20.220',
   );
 
   static int get port => _definedPort;
@@ -79,7 +79,6 @@ class ApiConfig {
     return 'http://$_host:$port';
   }
 
-  // This is what your ApiEndpoints currently expects.
   static String get baseUrl => serverUrl;
 
   static Uri uriForPath(String path) {
