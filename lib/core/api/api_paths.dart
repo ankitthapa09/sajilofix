@@ -13,4 +13,8 @@ class ApiPaths {
   static const String uploadProfilePhoto = '/api/users/me/photo';
   static const String getMe = '/api/users/me';
   static const String deleteProfilePhoto = '/api/users/me/photo';
+
+  // Issues
+  static const String issues = '/api/issues';
+  static const String issueById = '/api/issues/';
 }

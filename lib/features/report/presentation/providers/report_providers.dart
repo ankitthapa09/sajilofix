@@ -1,5 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:sajilofix/core/api/api_client.dart';
 import 'package:sajilofix/features/report/presentation/models/report_form_draft.dart';
+import 'package:sajilofix/core/services/network/network_info.dart';
+import 'package:sajilofix/features/report/data/datasources/remote/report_remote_datasource.dart';
+import 'package:sajilofix/features/report/data/repositories/report_repository_impl.dart';
+import 'package:sajilofix/features/report/domain/repositories/report_repository.dart';
+import 'package:sajilofix/features/report/domain/usecases/submit_report_usecase.dart';
 
 final reportFormDraftProvider =
     StateNotifierProvider<ReportFormDraftNotifier, ReportFormDraft>((ref) {
@@ -21,11 +28,19 @@ class ReportFormDraftNotifier extends StateNotifier<ReportFormDraft> {
     required String title,
     required String subtitle,
     String? landmark,
+    String? district,
+    String? ward,
+    double? latitude,
+    double? longitude,
   }) {
     state = state.copyWith(
       locationTitle: title,
       locationSubtitle: subtitle,
       landmark: landmark,
+      district: district,
+      ward: ward,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 
@@ -36,4 +51,34 @@ class ReportFormDraftNotifier extends StateNotifier<ReportFormDraft> {
   void setUrgency(String urgency) {
     state = state.copyWith(urgency: urgency);
   }
+
+  void setPhotos(List<XFile> photos) {
+    state = state.copyWith(photos: List<XFile>.from(photos));
+  }
+
+  void addPhoto(XFile photo) {
+    state = state.copyWith(photos: [...state.photos, photo]);
+  }
+
+  void removePhotoAt(int index) {
+    final updated = List<XFile>.from(state.photos);
+    if (index < 0 || index >= updated.length) return;
+    updated.removeAt(index);
+    state = state.copyWith(photos: updated);
+  }
 }
+
+final reportRemoteDatasourceProvider = Provider<ReportRemoteDatasource>((ref) {
+  return ReportRemoteDatasource(apiClient: ref.read(apiClientProvider));
+});
+
+final reportRepositoryProvider = Provider<ReportRepository>((ref) {
+  return ReportRepositoryImpl(
+    remote: ref.read(reportRemoteDatasourceProvider),
+    networkInfo: ref.read(networkInfoProvider),
+  );
+});
+
+final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
+  return SubmitReportUseCase(ref.read(reportRepositoryProvider));
+});

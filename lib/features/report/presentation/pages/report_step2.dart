@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/core/services/app_permissions.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step3.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
 import 'package:sajilofix/features/report/presentation/widgets/media/add_photo_card.dart';
 import 'package:sajilofix/features/report/presentation/widgets/media/empty_photo_state.dart';
 import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
 import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
-import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
-import 'package:sajilofix/core/services/app_permissions.dart';
-import 'package:sajilofix/common/sajilofix_snackbar.dart';
 
 class ReportStep2 extends ConsumerStatefulWidget {
   const ReportStep2({super.key});
@@ -17,6 +20,8 @@ class ReportStep2 extends ConsumerStatefulWidget {
 }
 
 class _ReportStep2State extends ConsumerState<ReportStep2> {
+  static const int _maxPhotos = 3;
+
   Future<void> _onAddPhotoTap() async {
     await showModalBottomSheet<void>(
       context: context,
@@ -35,11 +40,7 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
                   final ok = await AppPermissions.ensureCamera(rootContext);
                   if (!rootContext.mounted) return;
                   if (!ok) return;
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Camera permission granted.',
-                    icon: Icons.check_circle_outline,
-                  );
+                  await _takePhoto(rootContext);
                 },
               ),
               ListTile(
@@ -51,11 +52,7 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
                   final ok = await AppPermissions.ensurePhotos(rootContext);
                   if (!rootContext.mounted) return;
                   if (!ok) return;
-                  showMySnackBar(
-                    context: rootContext,
-                    message: 'Photos permission granted.',
-                    icon: Icons.check_circle_outline,
-                  );
+                  await _pickFromGallery(rootContext);
                 },
               ),
               const SizedBox(height: 8),
@@ -66,8 +63,84 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
     );
   }
 
+  Future<void> _takePhoto(BuildContext rootContext) async {
+    final photos = ref.read(reportFormDraftProvider).photos;
+    if (photos.length >= _maxPhotos) {
+      showMySnackBar(
+        context: rootContext,
+        message: 'You can upload up to $_maxPhotos photos.',
+        isError: true,
+        icon: Icons.info_outline,
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final file = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+
+    if (!mounted) return;
+
+    if (file == null) {
+      showMySnackBar(
+        context: rootContext,
+        message: 'No photo captured.',
+        icon: Icons.info_outline,
+      );
+      return;
+    }
+
+    ref.read(reportFormDraftProvider.notifier).addPhoto(file);
+  }
+
+  Future<void> _pickFromGallery(BuildContext rootContext) async {
+    final photos = ref.read(reportFormDraftProvider).photos;
+    if (photos.length >= _maxPhotos) {
+      showMySnackBar(
+        context: rootContext,
+        message: 'You can upload up to $_maxPhotos photos.',
+        isError: true,
+        icon: Icons.info_outline,
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final files = await picker.pickMultiImage(imageQuality: 85, maxWidth: 1600);
+
+    if (!mounted) return;
+
+    if (files.isEmpty) {
+      showMySnackBar(
+        context: rootContext,
+        message: 'No photos selected.',
+        icon: Icons.info_outline,
+      );
+      return;
+    }
+
+    final remaining = _maxPhotos - photos.length;
+    final toAdd = files.take(remaining).toList();
+    final updated = [...photos, ...toAdd];
+    ref.read(reportFormDraftProvider.notifier).setPhotos(updated);
+
+    if (files.length > remaining) {
+      showMySnackBar(
+        context: rootContext,
+        message: 'Only $_maxPhotos photos are allowed.',
+        isError: true,
+        icon: Icons.info_outline,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final photos = ref.watch(reportFormDraftProvider).photos;
+
     return Scaffold(
       appBar: const ReportAppBar(title: "Report Issue"),
       body: Padding(
@@ -94,7 +167,76 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
             AddPhotoCard(onTap: _onAddPhotoTap),
             const SizedBox(height: 40),
 
-            const EmptyPhotoState(),
+            if (photos.isEmpty)
+              const EmptyPhotoState()
+            else
+              SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: photos.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final photo = photos[index];
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: kIsWeb
+                              ? Image.network(
+                                  photo.path,
+                                  width: 110,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                )
+                              : FutureBuilder<Uint8List>(
+                                  future: photo.readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    final bytes = snapshot.data;
+                                    if (bytes == null) {
+                                      return Container(
+                                        width: 110,
+                                        height: 110,
+                                        color: Colors.grey.shade200,
+                                      );
+                                    }
+                                    return Image.memory(
+                                      bytes,
+                                      width: 110,
+                                      height: 110,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
+                        ),
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: InkWell(
+                            onTap: () {
+                              ref
+                                  .read(reportFormDraftProvider.notifier)
+                                  .removePhotoAt(index);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             const SizedBox(height: 24),
 
             // const TipCard(

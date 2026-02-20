@@ -1,4 +1,5 @@
 class ReportRouteNames {
+  static const step1 = '/report/step1';
   static const step2 = '/report/step2';
   static const step3 = '/report/step3';
   static const step4 = '/report/step4';
