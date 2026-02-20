@@ -28,8 +28,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
 
-    // Best-effort refresh so persisted `profilePhoto` shows immediately
-    // even if local cache is stale.
     Future.microtask(() async {
       await _syncCurrentUserFromApi();
       if (!mounted) return;

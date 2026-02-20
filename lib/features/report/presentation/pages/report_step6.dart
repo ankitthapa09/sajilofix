@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
 import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
+import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 
 class ReportStep6 extends ConsumerStatefulWidget {
   const ReportStep6({super.key});
@@ -15,6 +17,8 @@ class ReportStep6 extends ConsumerStatefulWidget {
 }
 
 class _ReportStep6State extends ConsumerState<ReportStep6> {
+  bool _isSubmitting = false;
+
   void _popToNamedOrCount(String routeName, int countFallback) {
     final navigator = Navigator.of(context);
 
@@ -43,14 +47,117 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
     if ((draft.locationSubtitle ?? '').trim().isEmpty) {
       missing.add('Location details');
     }
+    if ((draft.district ?? '').trim().isEmpty) missing.add('District');
+    if ((draft.ward ?? '').trim().isEmpty) missing.add('Ward');
     if ((draft.landmark ?? '').trim().isEmpty) missing.add('Landmark');
     if ((draft.issueTitle ?? '').trim().isEmpty) missing.add('Issue title');
     if ((draft.issueDescription ?? '').trim().isEmpty) {
       missing.add('Issue description');
     }
     if ((draft.urgency ?? '').trim().isEmpty) missing.add('Urgency');
+    if (draft.photos.isEmpty) missing.add('Photos');
 
     return missing;
+  }
+
+  String _mapCategory(String? category) {
+    switch ((category ?? '').trim().toLowerCase()) {
+      case 'roads & potholes':
+        return 'roads_potholes';
+      case 'electricity':
+        return 'electricity';
+      case 'water supply':
+        return 'water_supply';
+      case 'waste management':
+        return 'waste_management';
+      case 'street lights':
+        return 'street_lights';
+      case 'public infrastructure':
+        return 'public_infrastructure';
+      case 'other':
+        return 'others';
+    }
+    return 'others';
+  }
+
+  String _mapUrgency(String? urgency) {
+    switch ((urgency ?? '').trim().toLowerCase()) {
+      case 'low priority':
+        return 'low';
+      case 'medium priority':
+        return 'medium';
+      case 'high priority':
+        return 'high';
+      case 'urgent':
+        return 'urgent';
+    }
+    return 'low';
+  }
+
+  Future<void> _submitReport() async {
+    if (_isSubmitting) return;
+
+    final missing = _missingRequiredFields();
+    if (missing.isNotEmpty) {
+      showMySnackBar(
+        context: context,
+        message:
+            'Please complete: ${missing.take(2).join(', ')}${missing.length > 2 ? '…' : ''}',
+        isError: true,
+        icon: Icons.info_outline,
+      );
+      return;
+    }
+
+    final draft = ref.read(reportFormDraftProvider);
+    final input = CreateIssueReportInput(
+      category: _mapCategory(draft.category),
+      title: draft.issueTitle!.trim(),
+      description: draft.issueDescription!.trim(),
+      urgency: _mapUrgency(draft.urgency),
+      location: IssueLocation(
+        address: draft.locationTitle!.trim(),
+        municipality: draft.locationSubtitle!.trim(),
+        district: draft.district!.trim(),
+        ward: draft.ward!.trim(),
+        landmark: draft.landmark?.trim(),
+        latitude: draft.latitude,
+        longitude: draft.longitude,
+      ),
+      photos: List.from(draft.photos),
+    );
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await ref.read(submitReportUseCaseProvider)(input);
+      if (!mounted) return;
+
+      showMySnackBar(
+        context: context,
+        message: 'Report submitted successfully.',
+        icon: Icons.check_circle_outline,
+      );
+
+      ref.read(reportFormDraftProvider.notifier).reset();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.dashboard,
+        (route) => false,
+        arguments: 0,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showMySnackBar(
+        context: context,
+        message: 'Failed to submit report: $e',
+        isError: true,
+        icon: Icons.error_outline,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -127,6 +234,22 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
                               style: const TextStyle(color: Colors.grey),
                             ),
                           ),
+                        if ((draft.district ?? '').trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              'District: ${draft.district!.trim()}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        if ((draft.ward ?? '').trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              'Ward: ${draft.ward!.trim()}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
                         if ((draft.landmark ?? '').trim().isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
@@ -169,7 +292,15 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
                   _ReviewSection(
                     title: 'Photos',
                     onEdit: () => _popToNamedOrCount(ReportRouteNames.step2, 4),
-                    child: Row(children: [_PhotoTile(label: 'Photo 1')]),
+                    child: Text(
+                      draft.photos.isEmpty
+                          ? 'No photos'
+                          : '${draft.photos.length} photo(s) selected',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 14),
 
@@ -218,23 +349,8 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
             child: GradientElevatedButton(
               text: 'Submit Report',
               onPressed: () {
-                final missing = _missingRequiredFields();
-                if (missing.isNotEmpty) {
-                  showMySnackBar(
-                    context: context,
-                    message:
-                        'Please complete: ${missing.take(2).join(', ')}${missing.length > 2 ? '…' : ''}',
-                    isError: true,
-                    icon: Icons.info_outline,
-                  );
-                  return;
-                }
-
-                showMySnackBar(
-                  context: context,
-                  message: 'Submitted (UI only for now).',
-                  icon: Icons.check_circle_outline,
-                );
+                if (_isSubmitting) return;
+                _submitReport();
               },
             ),
           ),
@@ -322,56 +438,6 @@ class _ReviewSection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           child,
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoTile extends StatelessWidget {
-  final String label;
-
-  const _PhotoTile({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      width: 92,
-      height: 92,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.35),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.image_outlined,
-                color: scheme.onSurface.withValues(alpha: 0.55),
-              ),
-            ),
-          ),
         ],
       ),
     );
