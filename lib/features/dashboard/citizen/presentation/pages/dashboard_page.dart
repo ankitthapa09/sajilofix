@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/home_page.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/myreport_page.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/profile_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/home_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/myreport_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_page.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step1.dart';
 //import 'package:sajilofix/features/report/presentation/pages/report_screen.dart';
 

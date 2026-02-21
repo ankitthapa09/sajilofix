@@ -16,4 +16,5 @@ class AppRoutes {
   static const String resetPassword = '/auth/reset-password';
 
   static const String dashboard = '/dashboard';
+  static const String adminDashboard = '/admin/dashboard';
 }

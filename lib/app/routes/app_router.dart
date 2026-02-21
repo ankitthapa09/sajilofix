@@ -6,7 +6,8 @@ import 'package:sajilofix/features/auth/presentation/pages/forget_password/reset
 import 'package:sajilofix/features/auth/presentation/pages/admin/admin_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/user/user_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_dashboard_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page2.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page3.dart';
@@ -56,6 +57,9 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => CitizenDashboard(initialIndex: initialIndex),
         );
+
+      case AppRoutes.adminDashboard:
+        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());

@@ -190,7 +190,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
                             Navigator.pushReplacementNamed(
                               context,
-                              AppRoutes.dashboard,
+                              AppRoutes.adminDashboard,
                             );
                           } catch (e) {
                             if (!context.mounted) return;

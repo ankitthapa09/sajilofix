@@ -4,7 +4,7 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-import 'package:sajilofix/features/dashboard/presentation/widgets/home_widgets.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/home_widgets.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 

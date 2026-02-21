@@ -11,8 +11,8 @@ import 'package:sajilofix/core/services/app_permissions.dart';
 import 'package:sajilofix/features/auth/data/datasources/remote/auth_datasource.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/profile_edit_page.dart';
-import 'package:sajilofix/features/dashboard/presentation/widgets/profile_widgets.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_edit_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

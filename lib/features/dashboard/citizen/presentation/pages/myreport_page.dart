@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
-import 'package:sajilofix/features/dashboard/presentation/widgets/myreport_widgets.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/myreport_widgets.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_view_page.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
