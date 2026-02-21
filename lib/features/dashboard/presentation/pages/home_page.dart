@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
+import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
@@ -29,7 +30,6 @@ class HomeScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // ── Top Bar ──────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -90,7 +90,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Greeting ─────────────────────────────────────────────
+            // Greeting
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -122,7 +122,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Stats Row ─────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -157,7 +156,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Report Now Banner ─────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -329,7 +327,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Categories ────────────────────────────────────────────
+            // Categories
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -401,7 +399,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Community Feed header ─────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -447,7 +444,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Community activity cards (horizontal) ─────────────────
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 150,
@@ -494,7 +490,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Your Reports header ───────────────────────────────────
+            // Your Reports header
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -549,7 +545,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // ── Your Report Cards ─────────────────────────────────────
+            // Your Report Cards
             reportsAsync.when(
               loading: () => const SliverToBoxAdapter(
                 child: Padding(
@@ -592,6 +588,10 @@ class HomeScreen extends ConsumerWidget {
                       status: status.label,
                       statusColor: status.color,
                       statusBg: status.bg,
+                      photoUrl: _buildIssuePhotoUrl(
+                        ApiEndpoints.baseUrl,
+                        report.photos.isNotEmpty ? report.photos.first : null,
+                      ),
                       icon: category.icon,
                       iconColor: category.color,
                       iconBg: category.bg,
@@ -812,11 +812,17 @@ class HomeScreen extends ConsumerWidget {
     final years = (diff.inDays / 365).floor();
     return '${years}y ago';
   }
+
+  String? _buildIssuePhotoUrl(String baseUrl, String? path) {
+    final rel = (path ?? '').trim();
+    if (rel.isEmpty) return null;
+    final cleanBase = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final cleanRel = rel.replaceAll(RegExp(r'^/+'), '');
+    if (cleanRel.startsWith('uploads/')) return '$cleanBase/$cleanRel';
+    return '$cleanBase/uploads/$cleanRel';
+  }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Stat Card
-// ─────────────────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String value;
   final String label;
@@ -880,9 +886,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // Category Card (horizontal scroll)
-// ─────────────────────────────────────────────────────────────
 class _CategoryCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -944,9 +948,8 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // Activity Card (horizontal scroll)
-// ─────────────────────────────────────────────────────────────
+
 class _ActivityCard extends StatelessWidget {
   final String title;
   final String location;
@@ -1058,9 +1061,8 @@ class _ActivityCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // Report Card (vertical list)
-// ─────────────────────────────────────────────────────────────
+
 class _ReportCard extends StatelessWidget {
   final String title;
   final String location;
@@ -1068,6 +1070,7 @@ class _ReportCard extends StatelessWidget {
   final String status;
   final Color statusColor;
   final Color statusBg;
+  final String? photoUrl;
   final IconData icon;
   final Color iconColor;
   final Color iconBg;
@@ -1080,6 +1083,7 @@ class _ReportCard extends StatelessWidget {
     required this.status,
     required this.statusColor,
     required this.statusBg,
+    required this.photoUrl,
     required this.icon,
     required this.iconColor,
     required this.iconBg,
@@ -1106,19 +1110,16 @@ class _ReportCard extends StatelessWidget {
       child: Row(
         children: [
           // Icon box
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: isDark ? iconColor.withValues(alpha: 0.15) : iconBg,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: iconColor, size: 22),
+          _ReportLeading(
+            photoUrl: photoUrl,
+            icon: icon,
+            iconColor: iconColor,
+            iconBg: iconBg,
+            isDark: isDark,
           ),
           const SizedBox(width: 14),
 
-          // Title + location
+          // Title with location
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1194,6 +1195,67 @@ class _ReportCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ReportLeading extends StatelessWidget {
+  final String? photoUrl;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final bool isDark;
+
+  const _ReportLeading({
+    required this.photoUrl,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final url = (photoUrl ?? '').trim();
+    final showImage = url.isNotEmpty;
+    if (showImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Image.network(
+          url,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallbackIcon(),
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _fallbackIcon(showLoader: true);
+          },
+        ),
+      );
+    }
+    return _fallbackIcon();
+  }
+
+  Widget _fallbackIcon({bool showLoader = false}) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: isDark ? iconColor.withValues(alpha: 0.15) : iconBg,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      alignment: Alignment.center,
+      child: showLoader
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+              ),
+            )
+          : Icon(icon, color: iconColor, size: 22),
     );
   }
 }

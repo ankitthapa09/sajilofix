@@ -57,10 +57,9 @@ class _MyreportScreenState extends ConsumerState<MyreportScreen>
         opacity: _fadeAnim,
         child: Column(
           children: [
-            // ── Header ────────────────────────────────────────────
             _Header(isDark: isDark),
 
-            // ── Search ────────────────────────────────────────────
+            // Search
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: _SearchField(
@@ -69,7 +68,7 @@ class _MyreportScreenState extends ConsumerState<MyreportScreen>
               ),
             ),
 
-            // ── Body ──────────────────────────────────────────────
+            // Body
             Expanded(
               child: reportsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -215,9 +214,6 @@ class _MyreportScreenState extends ConsumerState<MyreportScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
   final bool isDark;
   const _Header({required this.isDark});
@@ -286,9 +282,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Stats Row
-// ─────────────────────────────────────────────────────────────
 class _StatsRow extends StatelessWidget {
   final Map<String, int> counts;
   final bool isDark;
@@ -396,9 +389,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Search Field
-// ─────────────────────────────────────────────────────────────
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final bool isDark;
@@ -551,9 +541,7 @@ class _FilterTabs extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // Report Card
-// ─────────────────────────────────────────────────────────────
 class _ReportCard extends StatelessWidget {
   final IssueReport report;
   final String? photoUrl;
@@ -732,7 +720,7 @@ class _ReportCard extends StatelessWidget {
             ),
           ),
 
-          // ── Bottom action bar
+          // Bottom action bar
           Container(
             decoration: BoxDecoration(
               color: isDark
@@ -921,9 +909,6 @@ class _ReportCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Chip
-// ─────────────────────────────────────────────────────────────
 class _Chip extends StatelessWidget {
   final String label;
   final Color color;
@@ -952,9 +937,6 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Empty State
-// ─────────────────────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
   final VoidCallback onRefresh;
   const _EmptyState({required this.onRefresh});
@@ -1035,9 +1017,6 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Error State
-// ─────────────────────────────────────────────────────────────
 class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
