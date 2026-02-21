@@ -321,7 +321,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // ── Hero Header ────────────────────────────────────────
+                // Hero Header
                 SliverToBoxAdapter(
                   child: _HeroHeader(
                     initials: _initials(user.fullName),
@@ -336,7 +336,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
 
-                // ── Body ─────────────────────────────────────────────
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   sliver: SliverToBoxAdapter(
@@ -427,9 +426,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Hero Header
-// ─────────────────────────────────────────────────────────────
 class _HeroHeader extends StatelessWidget {
   final String initials;
   final String fullName;
@@ -501,7 +497,6 @@ class _HeroHeader extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(24, topPadding + 16, 24, 24),
             child: Column(
               children: [
-                // ── Top bar ─────────────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -551,7 +546,7 @@ class _HeroHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Avatar ──────────────────────────────────────────
+                // Avatar
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -605,7 +600,6 @@ class _HeroHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
 
-                // ── Name & Email ─────────────────────────────────────
                 Text(
                   fullName,
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -623,7 +617,6 @@ class _HeroHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Account Status badge ─────────────────────────────
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -718,9 +711,6 @@ class _HeroHeader extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Quick Actions Row
-// ─────────────────────────────────────────────────────────────
 class _QuickActionsRow extends StatelessWidget {
   final VoidCallback onHome;
   final VoidCallback onReport;
@@ -836,9 +826,6 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Settings Menu Card
-// ─────────────────────────────────────────────────────────────
 class _SettingsMenuCard extends StatelessWidget {
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
@@ -963,9 +950,6 @@ class _SettingsMenuCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Logout Button
-// ─────────────────────────────────────────────────────────────
 class _LogoutButton extends StatelessWidget {
   final VoidCallback onLogout;
   const _LogoutButton({required this.onLogout});
@@ -996,9 +980,6 @@ class _LogoutButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Bottom Sheet Option
-// ─────────────────────────────────────────────────────────────
 class _BottomSheetOption extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1039,9 +1020,6 @@ class _BottomSheetOption extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Settings Card base
-// ─────────────────────────────────────────────────────────────
 class _SettingsCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1102,9 +1080,6 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Section widgets
-// ─────────────────────────────────────────────────────────────
 class _NotificationsSection extends StatelessWidget {
   final bool pushNotifications;
   final bool emailNotifications;

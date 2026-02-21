@@ -1,203 +1,10 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:sajilofix/core/constants/hero_tags.dart';
-// import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-
-// class HomeScreen extends ConsumerWidget {
-//   const HomeScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final currentUserAsync = ref.watch(currentUserProvider);
-//     final fullName = currentUserAsync.maybeWhen(
-//       data: (user) => user?.fullName,
-//       orElse: () => null,
-//     );
-
-//     return Scaffold(
-//       backgroundColor: const Color(0xffF9F9F9),
-//       body: SafeArea(
-//         child: SingleChildScrollView(
-//           padding: const EdgeInsets.all(16),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Row(
-//                 children: [
-//                   Hero(
-//                     tag: HeroTags.appLogo,
-//                     child: Image.asset(
-//                       "assets/images/sajilofix_logo.png",
-//                       height: 100,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               Text(
-//                 "Hello, ${fullName ?? 'User'} 👋",
-//                 style: const TextStyle(
-//                   fontSize: 22,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-
-//               const SizedBox(height: 4),
-
-//               const Text(
-//                 "Report problems around your community.",
-//                 style: TextStyle(color: Colors.grey),
-//               ),
-
-//               const SizedBox(height: 20),
-
-//               // Report Card
-//               Container(
-//                 padding: const EdgeInsets.all(16),
-//                 decoration: BoxDecoration(
-//                   borderRadius: BorderRadius.circular(16),
-//                   gradient: const LinearGradient(
-//                     colors: [Color(0xFF041027), Color(0xFF3533cd)],
-//                   ),
-//                 ),
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: const [
-//                         Text(
-//                           "Report an Issue ",
-//                           style: TextStyle(
-//                             color: Colors.white,
-//                             fontSize: 18,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                         SizedBox(height: 4),
-//                         Text(
-//                           "Tap to capture and submit",
-//                           style: TextStyle(color: Colors.white70),
-//                         ),
-//                       ],
-//                     ),
-//                     const CircleAvatar(
-//                       radius: 28,
-//                       backgroundColor: Colors.white24,
-//                       child: Icon(Icons.camera_alt, color: Colors.white),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-
-//               const SizedBox(height: 20),
-
-//               // Categories
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: const [
-//                   _CategoryItem(icon: Icons.streetview, label: "Road Damage"),
-//                   _CategoryItem(icon: Icons.lightbulb, label: "Street Light"),
-//                   _CategoryItem(icon: Icons.water_drop, label: "Water"),
-//                 ],
-//               ),
-
-//               const SizedBox(height: 24),
-
-//               const Text(
-//                 "Your Reports",
-//                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//               ),
-
-//               const SizedBox(height: 12),
-
-//               _reportCard(
-//                 title: "Road Pothole",
-//                 location: "Kalanki",
-//                 status: "Pending",
-//               ),
-
-//               const SizedBox(height: 12),
-
-//               _reportCard(
-//                 title: "Street Light Issue",
-//                 location: "Pulchowk",
-//                 status: "Pending",
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _reportCard({
-//     required String title,
-//     required String location,
-//     required String status,
-//   }) {
-//     return Container(
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(14),
-//       ),
-//       child: ListTile(
-//         leading: Container(
-//           width: 50,
-//           height: 50,
-//           decoration: BoxDecoration(
-//             color: Colors.grey.shade200,
-//             borderRadius: BorderRadius.circular(10),
-//           ),
-//         ),
-//         title: Text(title),
-//         subtitle: Text(location),
-//         trailing: Container(
-//           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-//           decoration: BoxDecoration(
-//             color: Colors.orange.shade100,
-//             borderRadius: BorderRadius.circular(20),
-//           ),
-//           child: Text(status, style: const TextStyle(color: Colors.orange)),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class _CategoryItem extends StatelessWidget {
-//   final IconData icon;
-//   final String label;
-
-//   const _CategoryItem({required this.icon, required this.label});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 100,
-//       padding: const EdgeInsets.all(12),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(14),
-//       ),
-//       child: Column(
-//         children: [
-//           Icon(icon, color: Colors.blue),
-//           const SizedBox(height: 6),
-//           Text(
-//             label,
-//             textAlign: TextAlign.center,
-//             style: const TextStyle(fontSize: 12),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -209,6 +16,7 @@ class HomeScreen extends ConsumerWidget {
       data: (user) => user?.fullName,
       orElse: () => null,
     );
+    final reportsAsync = ref.watch(myReportsProvider);
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -318,38 +126,33 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        value: '12',
-                        label: 'Total Reports',
-                        icon: Icons.assignment_outlined,
-                        gradient: const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                        isDark: isDark,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatCard(
-                        value: '8',
-                        label: 'Resolved',
-                        icon: Icons.check_circle_outline,
-                        gradient: const [Color(0xFF059669), Color(0xFF047857)],
-                        isDark: isDark,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatCard(
-                        value: '4',
-                        label: 'Pending',
-                        icon: Icons.hourglass_empty_rounded,
-                        gradient: const [Color(0xFFD97706), Color(0xFFB45309)],
-                        isDark: isDark,
-                      ),
-                    ),
-                  ],
+                child: reportsAsync.when(
+                  loading: () => _buildStatsRow(
+                    total: '-',
+                    resolved: '-',
+                    pending: '-',
+                    isDark: isDark,
+                  ),
+                  error: (_, __) => _buildStatsRow(
+                    total: '-',
+                    resolved: '-',
+                    pending: '-',
+                    isDark: isDark,
+                  ),
+                  data: (reports) {
+                    final total = reports.length;
+                    final resolved = _countStatus(reports, const {'resolved'});
+                    final pending = _countStatus(reports, const {
+                      'pending',
+                      'in_progress',
+                    });
+                    return _buildStatsRow(
+                      total: '$total',
+                      resolved: '$resolved',
+                      pending: '$pending',
+                      isDark: isDark,
+                    );
+                  },
                 ),
               ),
             ),
@@ -451,42 +254,50 @@ class HomeScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 9,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB),
-                                    borderRadius: BorderRadius.circular(14),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(
-                                          0xFF2563EB,
-                                        ).withValues(alpha: 0.4),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
+                                InkWell(
+                                  onTap: () => Navigator.of(context)
+                                      .pushReplacementNamed(
+                                        AppRoutes.dashboard,
+                                        arguments: 1,
                                       ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.camera_alt_rounded,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Report Now',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 13,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 9,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2563EB),
+                                      borderRadius: BorderRadius.circular(14),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFF2563EB,
+                                          ).withValues(alpha: 0.4),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.camera_alt_rounded,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Report Now',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -640,45 +451,45 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 150,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-                  children: [
-                    _ActivityCard(
-                      title: 'Pothole Fixed!',
-                      location: 'Kalanki, Kathmandu',
-                      time: '2h ago',
-                      status: 'Resolved',
-                      statusColor: const Color(0xFF059669),
-                      statusBg: const Color(0xFFDCFCE7),
-                      icon: Icons.construction_rounded,
-                      iconColor: const Color(0xFFEF4444),
-                      isDark: isDark,
+                child: reportsAsync.when(
+                  loading: () => const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    _ActivityCard(
-                      title: 'Street Light Out',
-                      location: 'Pulchowk, Lalitpur',
-                      time: '5h ago',
-                      status: 'In Progress',
-                      statusColor: const Color(0xFF2563EB),
-                      statusBg: const Color(0xFFDBEAFE),
-                      icon: Icons.lightbulb_rounded,
-                      iconColor: const Color(0xFFF59E0B),
-                      isDark: isDark,
-                    ),
-                    _ActivityCard(
-                      title: 'Water Leakage',
-                      location: 'Baneshwor, KTM',
-                      time: '1d ago',
-                      status: 'Pending',
-                      statusColor: const Color(0xFFD97706),
-                      statusBg: const Color(0xFFFEF3C7),
-                      icon: Icons.water_drop_rounded,
-                      iconColor: const Color(0xFF3B82F6),
-                      isDark: isDark,
-                    ),
-                  ],
+                  ),
+                  error: (_, __) => const Center(
+                    child: Text('Unable to load recent activity'),
+                  ),
+                  data: (reports) {
+                    final items = _sortedReports(reports).take(5).toList();
+                    if (items.isEmpty) {
+                      return const Center(child: Text('No activity yet'));
+                    }
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final report = items[index];
+                        final status = _statusStyle(report.status);
+                        final category = _categoryStyle(report.category);
+                        return _ActivityCard(
+                          title: report.title,
+                          location: _formatLocation(report.location),
+                          time: _relativeTime(report.createdAt),
+                          status: status.label,
+                          statusColor: status.color,
+                          statusBg: status.bg,
+                          icon: category.icon,
+                          iconColor: category.color,
+                          isDark: isDark,
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),
@@ -700,9 +511,9 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        // Navigate to full reports page
-                      },
+                      onTap: () => Navigator.of(
+                        context,
+                      ).pushReplacementNamed(AppRoutes.dashboard, arguments: 2),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -739,50 +550,63 @@ class HomeScreen extends ConsumerWidget {
             ),
 
             // ── Your Report Cards ─────────────────────────────────────
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _ReportCard(
-                    title: 'Road Pothole',
-                    location: 'Kalanki, Kathmandu',
-                    date: 'Feb 18, 2026',
-                    status: 'Pending',
-                    statusColor: const Color(0xFFD97706),
-                    statusBg: const Color(0xFFFEF3C7),
-                    icon: Icons.construction_rounded,
-                    iconColor: const Color(0xFFEF4444),
-                    iconBg: const Color(0xFFFEE2E2),
-                    isDark: isDark,
+            reportsAsync.when(
+              loading: () => const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _ReportCard(
-                    title: 'Street Light Issue',
-                    location: 'Pulchowk, Lalitpur',
-                    date: 'Feb 15, 2026',
-                    status: 'Resolved',
-                    statusColor: const Color(0xFF059669),
-                    statusBg: const Color(0xFFDCFCE7),
-                    icon: Icons.lightbulb_rounded,
-                    iconColor: const Color(0xFFF59E0B),
-                    iconBg: const Color(0xFFFEF9C3),
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 12),
-                  _ReportCard(
-                    title: 'Garbage Overflow',
-                    location: 'Baneshwor, KTM',
-                    date: 'Feb 10, 2026',
-                    status: 'In Progress',
-                    statusColor: const Color(0xFF2563EB),
-                    statusBg: const Color(0xFFDBEAFE),
-                    icon: Icons.delete_outline_rounded,
-                    iconColor: const Color(0xFF10B981),
-                    iconBg: const Color(0xFFD1FAE5),
-                    isDark: isDark,
-                  ),
-                ]),
+                ),
               ),
+              error: (_, __) => const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  child: Center(child: Text('Unable to load your reports')),
+                ),
+              ),
+              data: (reports) {
+                final items = _sortedReports(reports).take(3).toList();
+                if (items.isEmpty) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(20, 12, 20, 32),
+                      child: Center(child: Text('No reports yet')),
+                    ),
+                  );
+                }
+                final tiles = <Widget>[];
+                for (var i = 0; i < items.length; i++) {
+                  final report = items[i];
+                  final status = _statusStyle(report.status);
+                  final category = _categoryStyle(report.category);
+                  tiles.add(
+                    _ReportCard(
+                      title: report.title,
+                      location: _formatLocation(report.location),
+                      date: _formatDate(report.createdAt),
+                      status: status.label,
+                      statusColor: status.color,
+                      statusBg: status.bg,
+                      icon: category.icon,
+                      iconColor: category.color,
+                      iconBg: category.bg,
+                      isDark: isDark,
+                    ),
+                  );
+                  if (i != items.length - 1) {
+                    tiles.add(const SizedBox(height: 12));
+                  }
+                }
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  sliver: SliverList(delegate: SliverChildListDelegate(tiles)),
+                );
+              },
             ),
           ],
         ),
@@ -793,6 +617,200 @@ class HomeScreen extends ConsumerWidget {
   String _firstName(String? fullName) {
     if (fullName == null || fullName.trim().isEmpty) return 'User';
     return fullName.trim().split(' ').first;
+  }
+
+  Widget _buildStatsRow({
+    required String total,
+    required String resolved,
+    required String pending,
+    required bool isDark,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: _StatCard(
+            value: total,
+            label: 'Total Reports',
+            icon: Icons.assignment_outlined,
+            gradient: const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _StatCard(
+            value: resolved,
+            label: 'Resolved',
+            icon: Icons.check_circle_outline,
+            gradient: const [Color(0xFF059669), Color(0xFF047857)],
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _StatCard(
+            value: pending,
+            label: 'Pending',
+            icon: Icons.hourglass_empty_rounded,
+            gradient: const [Color(0xFFD97706), Color(0xFFB45309)],
+            isDark: isDark,
+          ),
+        ),
+      ],
+    );
+  }
+
+  int _countStatus(List<IssueReport> reports, Set<String> statuses) {
+    var count = 0;
+    for (final report in reports) {
+      final status = report.status.trim().toLowerCase();
+      if (statuses.contains(status)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  List<IssueReport> _sortedReports(List<IssueReport> reports) {
+    final items = List<IssueReport>.from(reports);
+    items.sort((a, b) {
+      final aDate = a.createdAt;
+      final bDate = b.createdAt;
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return bDate.compareTo(aDate);
+    });
+    return items;
+  }
+
+  ({String label, Color color, Color bg}) _statusStyle(String status) {
+    switch (status.trim().toLowerCase()) {
+      case 'resolved':
+        return (
+          label: 'Resolved',
+          color: const Color(0xFF059669),
+          bg: const Color(0xFFDCFCE7),
+        );
+      case 'in_progress':
+        return (
+          label: 'In Progress',
+          color: const Color(0xFF2563EB),
+          bg: const Color(0xFFDBEAFE),
+        );
+      default:
+        return (
+          label: 'Pending',
+          color: const Color(0xFFD97706),
+          bg: const Color(0xFFFEF3C7),
+        );
+    }
+  }
+
+  ({IconData icon, Color color, Color bg}) _categoryStyle(String category) {
+    final key = category
+        .trim()
+        .toLowerCase()
+        .replaceAll('&', 'and')
+        .replaceAll(RegExp(r'[_\s]+'), ' ');
+    switch (key) {
+      case 'roads and potholes':
+      case 'roads potholes':
+        return (
+          icon: Icons.construction_rounded,
+          color: const Color(0xFFEF4444),
+          bg: const Color(0xFFFEE2E2),
+        );
+      case 'street lights':
+      case 'street light':
+        return (
+          icon: Icons.lightbulb_rounded,
+          color: const Color(0xFFF59E0B),
+          bg: const Color(0xFFFEF9C3),
+        );
+      case 'water supply':
+      case 'water':
+        return (
+          icon: Icons.water_drop_rounded,
+          color: const Color(0xFF3B82F6),
+          bg: const Color(0xFFDBEAFE),
+        );
+      case 'waste management':
+      case 'garbage':
+        return (
+          icon: Icons.delete_outline_rounded,
+          color: const Color(0xFF10B981),
+          bg: const Color(0xFFD1FAE5),
+        );
+      case 'public infrastructure':
+        return (
+          icon: Icons.apartment_rounded,
+          color: const Color(0xFF8B5CF6),
+          bg: const Color(0xFFEDE9FE),
+        );
+      case 'electricity':
+        return (
+          icon: Icons.bolt_rounded,
+          color: const Color(0xFF2563EB),
+          bg: const Color(0xFFE0F2FE),
+        );
+      default:
+        return (
+          icon: Icons.more_horiz_rounded,
+          color: const Color(0xFF6B7280),
+          bg: const Color(0xFFF3F4F6),
+        );
+    }
+  }
+
+  String _formatLocation(IssueLocation location) {
+    final pieces = <String>[];
+    if (location.address.trim().isNotEmpty) {
+      pieces.add(location.address.trim());
+    }
+    if (location.municipality.trim().isNotEmpty) {
+      pieces.add(location.municipality.trim());
+    }
+    if (location.district.trim().isNotEmpty) {
+      pieces.add(location.district.trim());
+    }
+    return pieces.isEmpty ? '-' : pieces.join(', ');
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '-';
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final month = months[date.month - 1];
+    return '$month ${date.day}, ${date.year}';
+  }
+
+  String _relativeTime(DateTime? date) {
+    if (date == null) return '-';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inSeconds < 60) return '${diff.inSeconds}s ago';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    final weeks = (diff.inDays / 7).floor();
+    if (weeks < 4) return '${weeks}w ago';
+    final months = (diff.inDays / 30).floor();
+    if (months < 12) return '${months}mo ago';
+    final years = (diff.inDays / 365).floor();
+    return '${years}y ago';
   }
 }
 
