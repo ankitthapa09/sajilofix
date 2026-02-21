@@ -5,6 +5,7 @@ import 'package:sajilofix/features/report/presentation/models/report_form_draft.
 import 'package:sajilofix/core/services/network/network_info.dart';
 import 'package:sajilofix/features/report/data/datasources/remote/report_remote_datasource.dart';
 import 'package:sajilofix/features/report/data/repositories/report_repository_impl.dart';
+import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/domain/repositories/report_repository.dart';
 import 'package:sajilofix/features/report/domain/usecases/submit_report_usecase.dart';
 
@@ -81,4 +82,8 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
 
 final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
   return SubmitReportUseCase(ref.read(reportRepositoryProvider));
+});
+
+final myReportsProvider = FutureProvider<List<IssueReport>>((ref) async {
+  return ref.read(reportRepositoryProvider).listReports();
 });
