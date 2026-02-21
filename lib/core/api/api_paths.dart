@@ -12,6 +12,7 @@ class ApiPaths {
   // Profile
   static const String uploadProfilePhoto = '/api/users/me/photo';
   static const String getMe = '/api/users/me';
+  static const String updateMe = '/api/users/me';
   static const String deleteProfilePhoto = '/api/users/me/photo';
 
   // Issues
