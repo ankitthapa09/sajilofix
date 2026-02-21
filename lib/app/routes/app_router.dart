@@ -59,7 +59,7 @@ class AppRouter {
         );
 
       case AppRoutes.adminDashboard:
-        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+        return MaterialPageRoute(builder: (_) => const AdminDashboard());
 
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());

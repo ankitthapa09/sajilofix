@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilofix/app/routes/app_routes.dart';
+import 'package:sajilofix/core/services/storage/user_session_service.dart';
+import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
+import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/home_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/myreport_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_page.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step1.dart';
 //import 'package:sajilofix/features/report/presentation/pages/report_screen.dart';
 
-class CitizenDashboard extends StatefulWidget {
+class CitizenDashboard extends ConsumerStatefulWidget {
   final int initialIndex;
 
   const CitizenDashboard({super.key, this.initialIndex = 0});
 
   @override
-  State<CitizenDashboard> createState() => _CitizenDashboardState();
+  ConsumerState<CitizenDashboard> createState() => _CitizenDashboardState();
 }
 
-class _CitizenDashboardState extends State<CitizenDashboard> {
+class _CitizenDashboardState extends ConsumerState<CitizenDashboard> {
   late int _selectedIndex;
+  bool _redirected = false;
 
   @override
   void initState() {
@@ -29,8 +35,32 @@ class _CitizenDashboardState extends State<CitizenDashboard> {
     const MyreportScreen(),
     const ProfileScreen(),
   ];
-  @override
-  Widget build(BuildContext context) {
+
+  void _handleRoleRedirect(AuthUser? user) {
+    if (!mounted || _redirected) return;
+    final hasSession = UserSessionService.isLoggedIn;
+    if (user == null) {
+      if (hasSession) return;
+      _redirected = true;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+      return;
+    }
+
+    if (user.roleIndex == 1) {
+      _redirected = true;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.adminDashboard,
+        (route) => false,
+      );
+    }
+  }
+
+  Widget _buildDashboard() {
     return Scaffold(
       body: lstBottomScreen[_selectedIndex],
       bottomNavigationBar: ClipRRect(
@@ -80,6 +110,26 @@ class _CitizenDashboardState extends State<CitizenDashboard> {
           ),
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUserAsync = ref.watch(currentUserProvider);
+    return currentUserAsync.when(
+      data: (user) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleRoleRedirect(user);
+        });
+        return _buildDashboard();
+      },
+      loading: _buildDashboard,
+      error: (_, __) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleRoleRedirect(null);
+        });
+        return _buildDashboard();
+      },
     );
   }
 }
