@@ -3,7 +3,8 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/features/auth/presentation/pages/forget_password/forget_password_screen.dart';
 import 'package:sajilofix/features/auth/presentation/pages/forget_password/get_code_screen.dart';
 import 'package:sajilofix/features/auth/presentation/pages/forget_password/resetpassword_screen.dart';
-import 'package:sajilofix/features/auth/presentation/pages/login_page.dart';
+import 'package:sajilofix/features/auth/presentation/pages/admin/admin_login_page.dart';
+import 'package:sajilofix/features/auth/presentation/pages/user/user_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
 import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
@@ -29,7 +30,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const Onboarding2Screen());
 
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(builder: (_) => const UserLoginScreen());
+
+      case AppRoutes.adminLogin:
+        return MaterialPageRoute(builder: (_) => const AdminLoginScreen());
 
       case AppRoutes.signup:
         return MaterialPageRoute(builder: (_) => const SignupScreen());

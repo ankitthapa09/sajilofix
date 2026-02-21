@@ -6,22 +6,45 @@ import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class UserLoginScreen extends ConsumerStatefulWidget {
+  const UserLoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<UserLoginScreen> createState() => _UserLoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
   bool showPassword = false;
-
-  int _selectedRoleIndex = 0; // 0 = Citizen, 1 = Admin
 
   final TextEditingController _loginEmailController = TextEditingController();
   final TextEditingController _loginPassController = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
+
+  bool _isAdminEmail(String email) {
+    return email.trim().toLowerCase() == 'admin@sajilofix.com';
+  }
+
+  bool _isAuthorityEmail(String email) {
+    return email.trim().toLowerCase().endsWith('@sajilofix.gov.np');
+  }
+
+  int _roleIndexForEmail(String email) {
+    if (_isAuthorityEmail(email)) return 2;
+    return 0;
+  }
+
+  String? _validateUserEmail(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'Please enter email';
+    if (!v.contains('@')) return 'Please enter valid email';
+
+    if (_isAdminEmail(v)) {
+      return 'Admin email must login from Admin Login';
+    }
+
+    return null;
+  }
 
   @override
   void dispose() {
@@ -75,44 +98,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Welcome Back',
+                        'Citizen / Authority Login',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: onSurface,
                         ),
                       ),
-                      const SizedBox(height: 14),
-
-                      // Citizen / Admin selector
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _RoleChip(
-                                text: 'Citizen',
-                                selected: _selectedRoleIndex == 0,
-                                onTap: () =>
-                                    setState(() => _selectedRoleIndex = 0),
-                              ),
-                            ),
-                            Expanded(
-                              child: _RoleChip(
-                                text: 'Admin',
-                                selected: _selectedRoleIndex == 1,
-                                onTap: () =>
-                                    setState(() => _selectedRoleIndex = 1),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
                       const SizedBox(height: 18),
                       Text('Email', style: theme.textTheme.labelLarge),
                       const SizedBox(height: 8),
@@ -127,16 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           prefixIcon: Icon(Icons.email_outlined),
                           hintText: 'your.email@example.com',
                         ),
-                        validator: (value) {
-                          final v = value?.trim() ?? '';
-                          if (v.isEmpty) {
-                            return 'Please enter email';
-                          }
-                          if (!v.contains('@')) {
-                            return 'Please enter valid email';
-                          }
-                          return null;
-                        },
+                        validator: _validateUserEmail,
                       ),
 
                       const SizedBox(height: 14),
@@ -198,13 +181,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               _formkey.currentState?.validate() ?? false;
                           if (!isValid) return;
 
+                          final email = _loginEmailController.text;
+                          final roleIndex = _roleIndexForEmail(email);
+
                           try {
                             await ref
                                 .read(loginUseCaseProvider)
                                 .call(
-                                  email: _loginEmailController.text,
+                                  email: email,
                                   password: _loginPassController.text,
-                                  roleIndex: _selectedRoleIndex,
+                                  roleIndex: roleIndex,
                                 );
 
                             ref.invalidate(currentUserProvider);
@@ -212,9 +198,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             if (!context.mounted) return;
                             showMySnackBar(
                               context: context,
-                              message: _selectedRoleIndex == 0
-                                  ? 'Login Successful (Citizen)!'
-                                  : 'Login Successful (Admin)!',
+                              message: roleIndex == 2
+                                  ? 'Login Successful (Authority)!'
+                                  : 'Login Successful (Citizen)!',
                             );
 
                             Navigator.pushReplacementNamed(
@@ -231,7 +217,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 6),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, AppRoutes.adminLogin);
+                        },
+                        child: Text(
+                          'Admin Login',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
@@ -322,45 +322,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoleChip extends StatelessWidget {
-  final String text;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _RoleChip({
-    required this.text,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? theme.colorScheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: selected
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ),
