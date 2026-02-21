@@ -21,6 +21,7 @@ class ApiEndpoints {
 
   static const String uploadProfilePhoto = ApiPaths.uploadProfilePhoto;
   static const String getMe = ApiPaths.getMe;
+  static const String updateMe = ApiPaths.updateMe;
   static const String deleteProfilePhoto = ApiPaths.deleteProfilePhoto;
 
   // Issues
