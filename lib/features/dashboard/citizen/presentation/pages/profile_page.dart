@@ -6,13 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/api/api_client.dart';
-import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
-import 'package:sajilofix/features/auth/data/datasources/remote/auth_datasource.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/profile_edit_page.dart';
-import 'package:sajilofix/features/dashboard/presentation/widgets/profile_widgets.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_profile_providers.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_edit_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -42,9 +41,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     _animController!.forward();
 
     Future.microtask(() async {
-      await _syncCurrentUserFromApi();
-      if (!mounted) return;
-      ref.invalidate(currentUserProvider);
+      await ref
+          .read(citizenProfileControllerProvider.notifier)
+          .syncCurrentUser();
     });
   }
 
@@ -52,29 +51,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   void dispose() {
     _animController?.dispose();
     super.dispose();
-  }
-
-  Future<void> _syncCurrentUserFromApi() async {
-    try {
-      final remote = ref.read(authRemoteDatasourceProvider);
-      final local = ref.read(authLocalDataSourceProvider);
-      final remoteUser = await remote.getMe();
-      if (remoteUser == null) return;
-      await local.upsertUserPreservePasswordHash(
-        fullName: remoteUser.fullName,
-        email: remoteUser.email,
-        phone: (remoteUser.phone ?? '').trim(),
-        roleIndex: remoteUser.roleIndex,
-        dob: remoteUser.dob,
-        citizenshipNumber: remoteUser.citizenshipNumber,
-        district: remoteUser.district,
-        municipality: remoteUser.municipality,
-        ward: remoteUser.ward,
-        tole: remoteUser.tole,
-        profilePhoto: remoteUser.profilePhoto,
-        createdAt: remoteUser.createdAt,
-      );
-    } catch (_) {}
   }
 
   String? _buildProfilePhotoUrl(String baseUrl, String? profilePhoto) {
@@ -99,7 +75,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     required Uint8List bytes,
   }) async {
     try {
-      final apiClient = ref.read(apiClientProvider);
       showMySnackBar(
         context: context,
         message: 'Uploading photo…',
@@ -111,14 +86,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           filename: file.name.isNotEmpty ? file.name : 'profile.jpg',
         ),
       });
-      await apiClient.uploadFile(
-        ApiEndpoints.uploadProfilePhoto,
-        formData: formData,
-        method: 'PUT',
-        options: Options(contentType: 'multipart/form-data'),
-      );
-      await _syncCurrentUserFromApi();
-      ref.invalidate(currentUserProvider);
+      await ref
+          .read(citizenProfileControllerProvider.notifier)
+          .uploadProfilePhoto(formData: formData);
       if (!mounted) return;
       showMySnackBar(
         context: context,
@@ -258,8 +228,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       MaterialPageRoute(builder: (_) => ProfileEditPage(user: user)),
     );
     if (updated == true && mounted) {
-      await _syncCurrentUserFromApi();
-      ref.invalidate(currentUserProvider);
+      await ref
+          .read(citizenProfileControllerProvider.notifier)
+          .syncCurrentUser();
     }
   }
 

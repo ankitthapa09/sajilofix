@@ -27,4 +27,11 @@ class ApiEndpoints {
   // Issues
   static const String issues = ApiPaths.issues;
   static const String issueById = ApiPaths.issueById;
+
+  // Admin
+  static const String adminUsers = ApiPaths.adminUsers;
+  static const String adminAuthorities = ApiPaths.adminAuthorities;
+  static const String adminAuthorityById = ApiPaths.adminAuthorityById;
+  static const String adminCitizens = ApiPaths.adminCitizens;
+  static const String adminCitizenById = ApiPaths.adminCitizenById;
 }

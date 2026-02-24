@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-import 'package:sajilofix/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 //import 'package:sajilofix/screens/signup_screen.dart';
 
