@@ -18,4 +18,11 @@ class ApiPaths {
   // Issues
   static const String issues = '/api/issues';
   static const String issueById = '/api/issues/';
+
+  // Admin
+  static const String adminUsers = '/api/admin/users';
+  static const String adminAuthorities = '/api/admin/authorities';
+  static const String adminAuthorityById = '/api/admin/authorities/';
+  static const String adminCitizens = '/api/admin/citizens';
+  static const String adminCitizenById = '/api/admin/citizens/';
 }

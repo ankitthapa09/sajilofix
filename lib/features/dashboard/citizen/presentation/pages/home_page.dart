@@ -4,6 +4,7 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/home_widgets.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
       orElse: () => null,
     );
     final reportsAsync = ref.watch(myReportsProvider);
+    final statsAsync = ref.watch(citizenHomeStatsProvider);
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -126,7 +128,7 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: reportsAsync.when(
+                child: statsAsync.when(
                   loading: () => _buildStatsRow(
                     total: '-',
                     resolved: '-',
@@ -139,17 +141,11 @@ class HomeScreen extends ConsumerWidget {
                     pending: '-',
                     isDark: isDark,
                   ),
-                  data: (reports) {
-                    final total = reports.length;
-                    final resolved = _countStatus(reports, const {'resolved'});
-                    final pending = _countStatus(reports, const {
-                      'pending',
-                      'in_progress',
-                    });
+                  data: (stats) {
                     return _buildStatsRow(
-                      total: '$total',
-                      resolved: '$resolved',
-                      pending: '$pending',
+                      total: '${stats.total}',
+                      resolved: '${stats.resolved}',
+                      pending: '${stats.pending}',
                       isDark: isDark,
                     );
                   },
@@ -659,17 +655,6 @@ class HomeScreen extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  int _countStatus(List<IssueReport> reports, Set<String> statuses) {
-    var count = 0;
-    for (final report in reports) {
-      final status = report.status.trim().toLowerCase();
-      if (statuses.contains(status)) {
-        count++;
-      }
-    }
-    return count;
   }
 
   List<IssueReport> _sortedReports(List<IssueReport> reports) {
