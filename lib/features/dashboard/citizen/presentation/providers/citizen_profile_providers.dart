@@ -9,11 +9,13 @@ import 'package:sajilofix/features/dashboard/citizen/data/citizen_profile_remote
 class CitizenProfileState {
   final bool isSyncing;
   final bool isUploading;
+  final String? status;
   final String? error;
 
   const CitizenProfileState({
     required this.isSyncing,
     required this.isUploading,
+    this.status,
     this.error,
   });
 
@@ -21,6 +23,7 @@ class CitizenProfileState {
     return const CitizenProfileState(
       isSyncing: false,
       isUploading: false,
+      status: null,
       error: null,
     );
   }
@@ -28,11 +31,13 @@ class CitizenProfileState {
   CitizenProfileState copyWith({
     bool? isSyncing,
     bool? isUploading,
+    String? status,
     String? error,
   }) {
     return CitizenProfileState(
       isSyncing: isSyncing ?? this.isSyncing,
       isUploading: isUploading ?? this.isUploading,
+      status: status ?? this.status,
       error: error,
     );
   }
@@ -71,11 +76,12 @@ class CitizenProfileController extends StateNotifier<CitizenProfileState> {
   Future<void> syncCurrentUser() async {
     state = state.copyWith(isSyncing: true, error: null);
     try {
-      final remoteUser = await _remote.fetchMe();
-      if (remoteUser == null) {
+      final payload = await _remote.fetchMe();
+      if (payload == null) {
         state = state.copyWith(isSyncing: false);
         return;
       }
+      final remoteUser = payload.user;
       await _local.upsertUserPreservePasswordHash(
         fullName: remoteUser.fullName,
         email: remoteUser.email,
@@ -92,7 +98,7 @@ class CitizenProfileController extends StateNotifier<CitizenProfileState> {
       );
       await UserSessionService.setCurrentUserEmail(remoteUser.email);
       _ref.invalidate(currentUserProvider);
-      state = state.copyWith(isSyncing: false);
+      state = state.copyWith(isSyncing: false, status: payload.status);
     } catch (e) {
       state = state.copyWith(isSyncing: false, error: e.toString());
     }

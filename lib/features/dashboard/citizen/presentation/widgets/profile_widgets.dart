@@ -8,6 +8,7 @@ class ProfileHeroHeader extends StatelessWidget {
   final String email;
   final Uint8List? photoBytes;
   final String? photoUrl;
+  final String? status;
   final VoidCallback onPickPhoto;
   final VoidCallback onEditProfile;
 
@@ -18,6 +19,7 @@ class ProfileHeroHeader extends StatelessWidget {
     required this.email,
     required this.photoBytes,
     required this.photoUrl,
+    required this.status,
     required this.onPickPhoto,
     required this.onEditProfile,
   });
@@ -188,42 +190,7 @@ class ProfileHeroHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF22C55E).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFF22C55E).withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFF22C55E),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Account Status: Active',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF86EFAC),
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _StatusPill(status: status),
               ],
             ),
           ),
@@ -277,6 +244,54 @@ class ProfileHeroHeader extends StatelessWidget {
           color: Colors.white,
           letterSpacing: -1,
         ),
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String? status;
+
+  const _StatusPill({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = (status ?? 'active').trim().toLowerCase();
+    final isSuspended = normalized == 'suspended';
+    final baseColor = isSuspended
+        ? const Color(0xFFEF4444)
+        : const Color(0xFF22C55E);
+    final textColor = isSuspended
+        ? const Color(0xFFFCA5A5)
+        : const Color(0xFF86EFAC);
+    final label = isSuspended ? 'Suspended' : 'Active';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: baseColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: baseColor.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: baseColor),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Account Status: $label',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }
