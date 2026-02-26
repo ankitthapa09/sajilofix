@@ -262,6 +262,19 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
     }
     await refresh();
   }
+
+  Future<AdminUserRow?> fetchUserDetail({
+    required String id,
+    required String role,
+  }) async {
+    if (role == 'authority') {
+      return _remote.fetchAuthorityById(id);
+    }
+    if (role == 'citizen') {
+      return _remote.fetchCitizenById(id);
+    }
+    return null;
+  }
 }
 
 final adminUsersControllerProvider =
