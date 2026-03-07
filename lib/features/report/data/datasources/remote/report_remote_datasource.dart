@@ -63,6 +63,16 @@ class ReportRemoteDatasource {
     }
   }
 
+  Future<void> deleteIssue(String id) async {
+    try {
+      await _apiClient.delete('${ApiEndpoints.issueById}$id');
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
   Future<FormData> _buildCreateFormData(CreateIssueReportInput input) async {
     final locationJson = jsonEncode(<String, dynamic>{
       'address': input.location.address,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
+import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/dashboard/admin/domain/entities/admin_user_row.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_user_form_page.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/providers/admin_users_providers.dart';
@@ -194,10 +195,9 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen>
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // ── Sticky header ─────────────────────────
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _StickyHeaderDelegate(
+            // ── Gradient header ──────────────────────
+            SliverToBoxAdapter(
+              child: _AdminPageHeader(
                 isDark: isDark,
                 onRefresh: () =>
                     ref.read(adminUsersControllerProvider.notifier).refresh(),
@@ -457,126 +457,154 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen>
 }
 
 // ─────────────────────────────────────────────────────────────
-// Sticky Persistent Header
+// Admin Page Header
 // ─────────────────────────────────────────────────────────────
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+class _AdminPageHeader extends StatelessWidget {
   final bool isDark;
   final VoidCallback onRefresh;
 
-  const _StickyHeaderDelegate({required this.isDark, required this.onRefresh});
-
-  static const _blue = Color(0xFF2563EB);
+  const _AdminPageHeader({required this.isDark, required this.onRefresh});
 
   @override
-  double get minExtent => 70;
-  @override
-  double get maxExtent => 70;
+  Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
 
-  @override
-  bool shouldRebuild(_StickyHeaderDelegate old) => old.isDark != isDark;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
     return Container(
-      color: isDark ? const Color(0xFF0A0D14) : const Color(0xFFF0F2F8),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(20, topPadding + 14, 20, 26),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E3A8A), Color(0xFF2563EB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Stack(
         children: [
-          // Icon badge
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(13),
-              boxShadow: [
-                BoxShadow(
-                  color: _blue.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.manage_accounts_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Title
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'User Management',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  ),
-                ),
-                Text(
-                  'Manage citizens & authorities',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.white38 : const Color(0xFF9CA3AF),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Refresh button
-          GestureDetector(
-            onTap: onRefresh,
+          Positioned(
+            top: -30,
+            right: -20,
             child: Container(
-              width: 38,
-              height: 38,
+              width: 150,
+              height: 150,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E2330) : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : const Color(0xFFE5E7EB),
-                ),
-                boxShadow: isDark
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.04),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -50,
+            left: -40,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.03),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Hero(
+                    tag: HeroTags.appLogo,
+                    child: Image.asset(
+                      'assets/images/sajilofix_logo.png',
+                      height: 36,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.admin_panel_settings_outlined,
+                          color: Colors.white70,
+                          size: 13,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Admin Panel',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: onRefresh,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white70,
+                        size: 17,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.refresh_rounded,
-                size: 17,
-                color: isDark ? Colors.white54 : const Color(0xFF374151),
+              const SizedBox(height: 20),
+              const Text(
+                'User Management',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              const Text(
+                'Manage citizens and authorities',
+                style: TextStyle(color: Colors.white60, fontSize: 13),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Admin Page Header
+// ─────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────
 // Icon Button helper

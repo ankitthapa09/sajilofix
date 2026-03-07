@@ -87,3 +87,32 @@ final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
 final myReportsProvider = FutureProvider<List<IssueReport>>((ref) async {
   return ref.read(reportRepositoryProvider).listReports();
 });
+
+final adminIssuesControllerProvider =
+    StateNotifierProvider<AdminIssuesController, AsyncValue<List<IssueReport>>>(
+      (ref) => AdminIssuesController(ref.read(reportRepositoryProvider)),
+    );
+
+class AdminIssuesController
+    extends StateNotifier<AsyncValue<List<IssueReport>>> {
+  final ReportRepository _repository;
+
+  AdminIssuesController(this._repository) : super(const AsyncValue.loading()) {
+    load();
+  }
+
+  Future<void> load() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(_repository.listReports);
+  }
+
+  Future<void> refresh() async {
+    await load();
+  }
+
+  Future<void> deleteIssue(String id) async {
+    await _repository.deleteIssue(id);
+    final current = state.valueOrNull ?? const <IssueReport>[];
+    state = AsyncValue.data(current.where((issue) => issue.id != id).toList());
+  }
+}
