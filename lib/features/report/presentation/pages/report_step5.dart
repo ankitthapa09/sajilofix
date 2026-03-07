@@ -34,6 +34,7 @@ class _ReportStep5State extends ConsumerState<ReportStep5> {
 
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: Column(
         children: [
           Padding(
@@ -52,14 +53,36 @@ class _ReportStep5State extends ConsumerState<ReportStep5> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Set Urgency Level',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Help us prioritize and respond to your issue appropriately',
-                    style: TextStyle(color: Colors.grey),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Set Urgency Level',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Help us prioritize and respond appropriately',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
 

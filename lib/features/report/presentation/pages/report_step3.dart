@@ -11,6 +11,7 @@ import 'package:sajilofix/features/report/domain/entities/geo_address.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_step4.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
 import 'package:sajilofix/features/report/presentation/widgets/navigation/report_progress_bar.dart';
 
 class ReportStep3 extends ConsumerStatefulWidget {
@@ -194,27 +195,62 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
     }
   }
 
+  Future<void> _openFullScreenMap() async {
+    final selected = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (_) => ReportMapFullScreenPage(
+          initialCenter: _mapCenter,
+          selected: _selectedLatLng,
+        ),
+      ),
+    );
+    if (selected == null) return;
+    _selectedLatLng = selected;
+    _mapCenter = selected;
+    _mapController.move(selected, 16);
+    if (mounted) setState(() {});
+    await _reverseGeocode(selected);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(), title: const Text("Report Screen")),
+      appBar: const ReportAppBar(title: 'Report Issue'),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
           const ReportProgressBar(currentStep: 3, totalSteps: 6),
 
-          const Divider(),
+          const SizedBox(height: 20),
 
-          const SizedBox(height: 24),
-
-          const Text(
-            "Where is it?",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Confirm the exact location of the issue",
-            style: TextStyle(color: Colors.grey),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Where is it?',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Confirm the exact location of the issue',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 20),
@@ -229,6 +265,7 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
               setState(() {});
               _reverseGeocode(point);
             },
+            onExpand: _openFullScreenMap,
           ),
 
           const SizedBox(height: 16),
@@ -464,49 +501,151 @@ class _MapCard extends StatelessWidget {
   final LatLng center;
   final LatLng? selected;
   final ValueChanged<LatLng> onTap;
+  final VoidCallback onExpand;
 
   const _MapCard({
     required this.controller,
     required this.center,
     required this.selected,
     required this.onTap,
+    required this.onExpand,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
         height: 220,
-        child: FlutterMap(
-          mapController: controller,
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: 14,
-            onTap: (tapPos, point) => onTap(point),
-          ),
+        child: Stack(
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.sajilofix.app',
-            ),
-            if (selected != null)
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: selected!,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_pin,
-                      color: Colors.red,
-                      size: 40,
-                    ),
-                  ),
-                ],
+            FlutterMap(
+              mapController: controller,
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 14,
+                onTap: (tapPos, point) => onTap(point),
               ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.sajilofix.app',
+                ),
+                if (selected != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: selected!,
+                        width: 40,
+                        height: 40,
+                        child: const Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Material(
+                color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                shape: const CircleBorder(),
+                child: IconButton(
+                  icon: const Icon(Icons.open_in_full),
+                  onPressed: onExpand,
+                  tooltip: 'Open map',
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ReportMapFullScreenPage extends StatefulWidget {
+  final LatLng initialCenter;
+  final LatLng? selected;
+
+  const ReportMapFullScreenPage({
+    super.key,
+    required this.initialCenter,
+    this.selected,
+  });
+
+  @override
+  State<ReportMapFullScreenPage> createState() =>
+      _ReportMapFullScreenPageState();
+}
+
+class _ReportMapFullScreenPageState extends State<ReportMapFullScreenPage> {
+  final MapController _controller = MapController();
+  LatLng? _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.selected;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Location')),
+      body: Stack(
+        children: [
+          FlutterMap(
+            mapController: _controller,
+            options: MapOptions(
+              initialCenter: widget.initialCenter,
+              initialZoom: 15,
+              onTap: (tapPos, point) {
+                setState(() => _selected = point);
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.sajilofix.app',
+              ),
+              if (_selected != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _selected!,
+                      width: 44,
+                      height: 44,
+                      child: const Icon(
+                        Icons.location_pin,
+                        color: Colors.red,
+                        size: 44,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _selected == null
+                    ? null
+                    : () => Navigator.pop(context, _selected),
+                child: const Text('Use this location'),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

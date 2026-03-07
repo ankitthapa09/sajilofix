@@ -41,9 +41,14 @@ class ReportRemoteDatasource {
     }
   }
 
-  Future<List<IssueReport>> listIssues() async {
+  Future<List<IssueReport>> listIssues({String? scope}) async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.issues);
+      final response = await _apiClient.get(
+        ApiEndpoints.issues,
+        queryParameters: <String, dynamic>{
+          if ((scope ?? '').trim().isNotEmpty) 'scope': scope?.trim(),
+        },
+      );
       final data = _asJsonMap(response.data);
       final payload = data['data'];
       if (payload is List) {

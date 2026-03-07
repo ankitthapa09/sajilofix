@@ -46,7 +46,6 @@ class _AdminUserFormPageState extends ConsumerState<AdminUserFormPage>
   static const _blue = Color(0xFF2563EB);
   static const _indigo = Color(0xFF4F46E5);
   static const _green = Color(0xFF059669);
-  static const _red = Color(0xFFDC2626);
   static const _amber = Color(0xFFD97706);
 
   @override

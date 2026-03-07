@@ -166,6 +166,7 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
 
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: Column(
         children: [
           const Padding(
@@ -184,14 +185,36 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Review & Submit',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Please review your report before submitting',
-                    style: TextStyle(color: Colors.grey),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Review & Submit',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Please review your report before submitting',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 18),
 
