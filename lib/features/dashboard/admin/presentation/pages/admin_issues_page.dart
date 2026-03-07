@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
@@ -14,6 +16,8 @@ class AdminIssuesScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
+  static const _defaultCenter = LatLng(27.7172, 85.3240);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -110,6 +114,19 @@ class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
       },
       data: (issues) {
         final counts = _statusCounts(issues);
+        final mapData = _buildMapData(issues);
+
+        slivers.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: _IssuesMapCard(
+                center: mapData.center,
+                markers: mapData.markers,
+              ),
+            ),
+          ),
+        );
 
         slivers.add(
           SliverToBoxAdapter(
@@ -236,6 +253,41 @@ class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
     );
   }
 
+  _MapData _buildMapData(List<IssueReport> issues) {
+    final markers = <Marker>[];
+    LatLng? center;
+
+    for (final issue in issues) {
+      final lat = issue.location.latitude;
+      final lng = issue.location.longitude;
+      if (lat == null || lng == null) continue;
+      final point = LatLng(lat, lng);
+      center ??= point;
+      markers.add(
+        Marker(
+          point: point,
+          width: 40,
+          height: 40,
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    ReportViewPage(report: issue, allowStatusUpdate: true),
+              ),
+            ),
+            child: const Icon(
+              Icons.location_pin,
+              color: Color(0xFFE11D48),
+              size: 36,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _MapData(center: center ?? _defaultCenter, markers: markers);
+  }
+
   static Future<bool> _confirmDelete(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -309,6 +361,61 @@ class _IssueMetric extends StatelessWidget {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MapData {
+  final LatLng center;
+  final List<Marker> markers;
+
+  const _MapData({required this.center, required this.markers});
+}
+
+class _IssuesMapCard extends StatelessWidget {
+  final LatLng center;
+  final List<Marker> markers;
+
+  const _IssuesMapCard({required this.center, required this.markers});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      height: 220,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2330) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: center,
+            initialZoom: 12,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+            ),
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.sajilofix.app',
+            ),
+            MarkerLayer(markers: markers),
           ],
         ),
       ),

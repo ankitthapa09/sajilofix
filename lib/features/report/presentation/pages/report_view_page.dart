@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
+
+const _defaultCenter = LatLng(27.7172, 85.3240);
 
 class ReportViewPage extends ConsumerStatefulWidget {
   final IssueReport report;
@@ -168,6 +172,24 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage> {
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 6),
+              if (report.location.latitude != null &&
+                  report.location.longitude != null) ...[
+                _IssueMapCard(
+                  center: LatLng(
+                    report.location.latitude!,
+                    report.location.longitude!,
+                  ),
+                  onExpand: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => IssueMapFullScreenPage(
+                        title: report.title,
+                        location: report.location,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Text(
                 _formatLocation(report.location),
                 style: const TextStyle(color: Colors.grey),
@@ -351,6 +373,124 @@ class _InfoRow extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IssueMapCard extends StatelessWidget {
+  final LatLng center;
+  final VoidCallback onExpand;
+
+  const _IssueMapCard({required this.center, required this.onExpand});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: 200,
+        child: Stack(
+          children: [
+            FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 15,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.sajilofix.app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: center,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_pin,
+                        color: Color(0xFFE11D48),
+                        size: 38,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Material(
+                color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                shape: const CircleBorder(),
+                child: IconButton(
+                  icon: const Icon(Icons.open_in_full),
+                  onPressed: onExpand,
+                  tooltip: 'Open map',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class IssueMapFullScreenPage extends StatelessWidget {
+  final String title;
+  final IssueLocation location;
+
+  const IssueMapFullScreenPage({
+    super.key,
+    required this.title,
+    required this.location,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final lat = location.latitude;
+    final lng = location.longitude;
+    final center = (lat != null && lng != null)
+        ? LatLng(lat, lng)
+        : _defaultCenter;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: FlutterMap(
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 16,
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
+          ),
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.sajilofix.app',
+          ),
+          if (lat != null && lng != null)
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(lat, lng),
+                  width: 44,
+                  height: 44,
+                  child: const Icon(
+                    Icons.location_pin,
+                    color: Color(0xFFE11D48),
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
