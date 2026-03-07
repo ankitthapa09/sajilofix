@@ -4,4 +4,8 @@ abstract interface class ReportRepository {
   Future<IssueReport> submitReport(CreateIssueReportInput input);
   Future<List<IssueReport>> listReports();
   Future<void> deleteIssue(String id);
+  Future<String> updateIssueStatus({
+    required String id,
+    required String status,
+  });
 }

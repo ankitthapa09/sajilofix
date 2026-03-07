@@ -177,9 +177,27 @@ class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
                   isDark: isDark,
                   onView: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ReportViewPage(report: issue),
+                      builder: (_) => ReportViewPage(
+                        report: issue,
+                        allowStatusUpdate: true,
+                      ),
                     ),
                   ),
+                  onStatusChange: (status) async {
+                    try {
+                      await ref
+                          .read(adminIssuesControllerProvider.notifier)
+                          .updateIssueStatus(id: issue.id, status: status);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      showMySnackBar(
+                        context: context,
+                        message: e.toString(),
+                        isError: true,
+                        icon: Icons.error_outline,
+                      );
+                    }
+                  },
                   onDelete: () async {
                     final confirmed = await _confirmDelete(context);
                     if (!confirmed) return;
@@ -302,12 +320,14 @@ class _IssueCard extends StatelessWidget {
   final IssueReport issue;
   final bool isDark;
   final VoidCallback onView;
+  final ValueChanged<String> onStatusChange;
   final VoidCallback onDelete;
 
   const _IssueCard({
     required this.issue,
     required this.isDark,
     required this.onView,
+    required this.onStatusChange,
     required this.onDelete,
   });
 
@@ -402,6 +422,8 @@ class _IssueCard extends StatelessWidget {
                 label: const Text('View'),
               ),
               const SizedBox(width: 12),
+              _StatusMenu(value: issue.status, onChanged: onStatusChange),
+              const Spacer(),
               TextButton.icon(
                 onPressed: onDelete,
                 icon: const Icon(Icons.delete_outline, size: 18),
@@ -470,5 +492,68 @@ class _IssueCard extends StatelessWidget {
     if (diff.inDays < 7) return '${diff.inDays} days ago';
     final weeks = (diff.inDays / 7).floor();
     return '$weeks weeks ago';
+  }
+}
+
+class _StatusMenu extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  const _StatusMenu({required this.value, required this.onChanged});
+
+  static const _statuses = <String>[
+    'pending',
+    'in_progress',
+    'resolved',
+    'rejected',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'Update status',
+      onSelected: onChanged,
+      itemBuilder: (_) => _statuses
+          .map(
+            (s) =>
+                PopupMenuItem<String>(value: s, child: Text(_statusLabel(s))),
+          )
+          .toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.edit_outlined, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              _statusLabel(value),
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _statusLabel(String status) {
+    switch (status.trim().toLowerCase()) {
+      case 'pending':
+        return 'Pending';
+      case 'in_progress':
+        return 'In Progress';
+      case 'resolved':
+        return 'Resolved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
+    }
   }
 }

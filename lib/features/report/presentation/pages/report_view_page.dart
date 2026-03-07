@@ -1,14 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
-class ReportViewPage extends StatelessWidget {
+class ReportViewPage extends ConsumerStatefulWidget {
   final IssueReport report;
+  final bool allowStatusUpdate;
 
-  const ReportViewPage({super.key, required this.report});
+  const ReportViewPage({
+    super.key,
+    required this.report,
+    this.allowStatusUpdate = false,
+  });
+
+  @override
+  ConsumerState<ReportViewPage> createState() => _ReportViewPageState();
+}
+
+class _ReportViewPageState extends ConsumerState<ReportViewPage> {
+  late String _status;
+  bool _updating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.report.status;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final report = widget.report;
     final photoUrls = report.photos
         .map((path) => _buildIssuePhotoUrl(ApiEndpoints.baseUrl, path))
         .whereType<String>()
@@ -78,8 +100,8 @@ class ReportViewPage extends StatelessWidget {
                 runSpacing: 6,
                 children: [
                   _PillChip(
-                    label: _statusLabel(report.status),
-                    color: _statusColor(report.status),
+                    label: _statusLabel(_status),
+                    color: _statusColor(_status),
                   ),
                   _PillChip(
                     label: _urgencyLabel(report.urgency),
@@ -87,9 +109,57 @@ class ReportViewPage extends StatelessWidget {
                   ),
                 ],
               ),
+              if (widget.allowStatusUpdate) ...[
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _status,
+                  decoration: const InputDecoration(labelText: 'Update Status'),
+                  items: const [
+                    DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                    DropdownMenuItem(
+                      value: 'in_progress',
+                      child: Text('In Progress'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'resolved',
+                      child: Text('Resolved'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'rejected',
+                      child: Text('Rejected'),
+                    ),
+                  ],
+                  onChanged: _updating
+                      ? null
+                      : (value) async {
+                          if (value == null || value == _status) return;
+                          setState(() {
+                            _updating = true;
+                          });
+                          try {
+                            await ref
+                                .read(adminIssuesControllerProvider.notifier)
+                                .updateIssueStatus(
+                                  id: report.id,
+                                  status: value,
+                                );
+                            if (!mounted) return;
+                            setState(() {
+                              _status = value;
+                            });
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _updating = false;
+                              });
+                            }
+                          }
+                        },
+                ),
+              ],
               const SizedBox(height: 16),
               _InfoRow(label: 'Category', value: report.category),
-              _InfoRow(label: 'Status', value: _statusLabel(report.status)),
+              _InfoRow(label: 'Status', value: _statusLabel(_status)),
               _InfoRow(label: 'Urgency', value: _urgencyLabel(report.urgency)),
               _InfoRow(label: 'Reported', value: _timeAgo(report.createdAt)),
               const SizedBox(height: 12),

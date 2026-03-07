@@ -115,4 +115,34 @@ class AdminIssuesController
     final current = state.valueOrNull ?? const <IssueReport>[];
     state = AsyncValue.data(current.where((issue) => issue.id != id).toList());
   }
+
+  Future<void> updateIssueStatus({
+    required String id,
+    required String status,
+  }) async {
+    final updatedStatus = await _repository.updateIssueStatus(
+      id: id,
+      status: status,
+    );
+    final current = state.valueOrNull ?? const <IssueReport>[];
+    state = AsyncValue.data(
+      current
+          .map(
+            (issue) => issue.id == id
+                ? IssueReport(
+                    id: issue.id,
+                    category: issue.category,
+                    title: issue.title,
+                    description: issue.description,
+                    urgency: issue.urgency,
+                    status: updatedStatus,
+                    location: issue.location,
+                    photos: issue.photos,
+                    createdAt: issue.createdAt,
+                  )
+                : issue,
+          )
+          .toList(),
+    );
+  }
 }
