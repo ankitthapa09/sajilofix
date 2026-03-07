@@ -27,6 +27,8 @@ class ApiEndpoints {
   // Issues
   static const String issues = ApiPaths.issues;
   static const String issueById = ApiPaths.issueById;
+  static const String issueReverseGeocode = ApiPaths.issueReverseGeocode;
+  static const String issueSearchLocation = ApiPaths.issueSearchLocation;
 
   // Admin
   static const String adminUsers = ApiPaths.adminUsers;
