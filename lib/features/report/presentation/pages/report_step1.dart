@@ -42,114 +42,117 @@ class _ReportStep1State extends ConsumerState<ReportStep1> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
       body: SafeArea(
-        child: Padding(
+        child: ListView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const ReportProgressBar(currentStep: 1, totalSteps: 6),
-
-              const SizedBox(height: 20),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF0F172A), Color(0xFF1D4ED8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          children: [
+            const ReportProgressBar(currentStep: 1, totalSteps: 6),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F172A), Color(0xFF1D4ED8)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1D4ED8).withValues(alpha: 0.30),
+                    blurRadius: 18,
+                    offset: const Offset(0, 9),
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1D4ED8).withValues(alpha: 0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "What's the issue?",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Select the category that best describes the problem',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
+                ],
               ),
-
-              const SizedBox(height: 20),
-
-              Expanded(
-                child: GridView.builder(
-                  itemCount: categories.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.05,
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "What's the issue?",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
-                  itemBuilder: (context, index) {
-                    final item = categories[index];
-                    return ReportCategoryCard(
-                      iconpath: item['icon'],
-                      title: item['title'],
-                      isSelected: selectedIndex == index,
-                      onTap: () {
+                  SizedBox(height: 6),
+                  Text(
+                    'Select the category that best describes the problem',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            GridView.builder(
+              itemCount: categories.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.05,
+              ),
+              itemBuilder: (context, index) {
+                final item = categories[index];
+                return ReportCategoryCard(
+                  iconpath: item['icon'],
+                  title: item['title'],
+                  isSelected: selectedIndex == index,
+                  onTap: () {
+                    ref
+                        .read(reportFormDraftProvider.notifier)
+                        .setCategory(item['title'] as String);
+                    setState(() {
+                      selectedIndex = index;
+                    });
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 22),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onPressed: selectedIndex == -1
+                    ? null
+                    : () {
+                        final selectedCategoryTitle =
+                            categories[selectedIndex]['title'] as String;
                         ref
                             .read(reportFormDraftProvider.notifier)
-                            .setCategory(item['title'] as String);
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
+                            .setCategory(selectedCategoryTitle);
 
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: selectedIndex == -1
-                      ? null
-                      : () {
-                          final selectedCategoryTitle =
-                              categories[selectedIndex]['title'] as String;
-                          ref
-                              .read(reportFormDraftProvider.notifier)
-                              .setCategory(selectedCategoryTitle);
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              settings: const RouteSettings(
-                                name: ReportRouteNames.step2,
-                              ),
-                              builder: (context) => const ReportStep2(),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            settings: const RouteSettings(
+                              name: ReportRouteNames.step2,
                             ),
-                          );
-                        },
-                  child: const Text('Continue'),
-                ),
+                            builder: (context) => const ReportStep2(),
+                          ),
+                        );
+                      },
+                child: const Text('Continue'),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );

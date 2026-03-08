@@ -31,167 +31,156 @@ class _ReportStep5State extends ConsumerState<ReportStep5> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: const [
-                SizedBox(height: 8),
-                ReportProgressBar(currentStep: 5, totalSteps: 6),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            const ReportProgressBar(currentStep: 5, totalSteps: 6),
+            const SizedBox(height: 16),
+            Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Set Urgency Level',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Help us prioritize and respond appropriately',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            _UrgencyCard(
+              title: 'Low Priority',
+              subtitle: 'Minor issue that can be addressed in normal timeframe',
+              icon: Icons.info_outline,
+              background: const Color(0xFFEAF2FF),
+              border: const Color(0xFF3A6ACA),
+              selected: _selected == 'Low Priority',
+              onTap: () => _select('Low Priority'),
+            ),
+            const SizedBox(height: 14),
+            _UrgencyCard(
+              title: 'Medium Priority',
+              subtitle:
+                  'Issue that should be handled soon but isn\'t an emergency',
+              icon: Icons.error_outline,
+              background: const Color(0xFFFFF7DC),
+              border: const Color(0xFFB07B00),
+              selected: _selected == 'Medium Priority',
+              onTap: () => _select('Medium Priority'),
+            ),
+            const SizedBox(height: 14),
+            _UrgencyCard(
+              title: 'High Priority',
+              subtitle: 'Significant issue needing prompt resolution',
+              icon: Icons.warning_amber_rounded,
+              background: const Color(0xFFFFEEE5),
+              border: const Color(0xFFEB6A2A),
+              selected: _selected == 'High Priority',
+              onTap: () => _select('High Priority'),
+            ),
+            const SizedBox(height: 14),
+            _UrgencyCard(
+              title: 'Urgent',
+              subtitle:
+                  'Critical issue requiring immediate attention for safety/health',
+              icon: Icons.report_gmailerrorred_outlined,
+              background: const Color(0xFFFFE8E8),
+              border: const Color(0xFFE53935),
+              selected: _selected == 'Urgent',
+              onTap: () => _select('Urgent'),
+            ),
+
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF2FF),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFBFD3FF)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Set Urgency Level',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Help us prioritize and respond appropriately',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  _UrgencyCard(
-                    title: 'Low Priority',
-                    subtitle:
-                        'Minor issue that can be addressed in normal timeframe',
-                    icon: Icons.info_outline,
-                    background: const Color(0xFFEAF2FF),
-                    border: const Color(0xFF3A6ACA),
-                    selected: _selected == 'Low Priority',
-                    onTap: () => _select('Low Priority'),
-                  ),
-                  const SizedBox(height: 14),
-                  _UrgencyCard(
-                    title: 'Medium Priority',
-                    subtitle:
-                        'Issue that should be handled soon but isn\'t an emergency',
-                    icon: Icons.error_outline,
-                    background: const Color(0xFFFFF7DC),
-                    border: const Color(0xFFB07B00),
-                    selected: _selected == 'Medium Priority',
-                    onTap: () => _select('Medium Priority'),
-                  ),
-                  const SizedBox(height: 14),
-                  _UrgencyCard(
-                    title: 'High Priority',
-                    subtitle: 'Significant issue needing prompt resolution',
-                    icon: Icons.warning_amber_rounded,
-                    background: const Color(0xFFFFEEE5),
-                    border: const Color(0xFFEB6A2A),
-                    selected: _selected == 'High Priority',
-                    onTap: () => _select('High Priority'),
-                  ),
-                  const SizedBox(height: 14),
-                  _UrgencyCard(
-                    title: 'Urgent',
-                    subtitle:
-                        'Critical issue requiring immediate attention for safety/health',
-                    icon: Icons.report_gmailerrorred_outlined,
-                    background: const Color(0xFFFFE8E8),
-                    border: const Color(0xFFE53935),
-                    selected: _selected == 'Urgent',
-                    onTap: () => _select('Urgent'),
-                  ),
-
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEAF2FF),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFBFD3FF)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.info_outline, color: colorScheme.primary),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            'Note: Urgent issues will be prioritized for immediate attention. '
-                            'Please only mark as urgent if the issue poses immediate safety or health risks.',
-                            style: TextStyle(color: Color(0xFF2A4B8D)),
-                          ),
-                        ),
-                      ],
+                  Icon(Icons.info_outline, color: colorScheme.primary),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Note: Urgent issues will be prioritized for immediate attention. '
+                      'Please only mark as urgent if the issue poses immediate safety or health risks.',
+                      style: TextStyle(color: Color(0xFF2A4B8D)),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _selected.trim().isEmpty
-                        ? null
-                        : () {
-                            ref
-                                .read(reportFormDraftProvider.notifier)
-                                .setUrgency(_selected);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                settings: const RouteSettings(
-                                  name: ReportRouteNames.step6,
-                                ),
-                                builder: (context) => const ReportStep6(),
-                              ),
-                            );
-                          },
-                    child: const Text('Continue'),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Back'),
-                ),
-              ],
+                onPressed: _selected.trim().isEmpty
+                    ? null
+                    : () {
+                        ref
+                            .read(reportFormDraftProvider.notifier)
+                            .setUrgency(_selected);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            settings: const RouteSettings(
+                              name: ReportRouteNames.step6,
+                            ),
+                            builder: (context) => const ReportStep6(),
+                          ),
+                        );
+                      },
+                child: const Text('Continue'),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

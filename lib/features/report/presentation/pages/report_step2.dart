@@ -141,170 +141,158 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final photos = ref.watch(reportFormDraftProvider).photos;
 
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(height: 8),
-                ReportProgressBar(currentStep: 2, totalSteps: 6),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            const ReportProgressBar(currentStep: 2, totalSteps: 6),
+            const SizedBox(height: 16),
+            Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Add Photos',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Take or upload photos showing the issue clearly',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                children: const [
+                  Text(
+                    'Add Photos',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 20),
-                  AddPhotoCard(onTap: _onAddPhotoTap),
-                  const SizedBox(height: 24),
-                  if (photos.isEmpty)
-                    const EmptyPhotoState()
-                  else
-                    SizedBox(
-                      height: 110,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: photos.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final photo = photos[index];
-                          return Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: kIsWeb
-                                    ? Image.network(
-                                        photo.path,
-                                        width: 120,
-                                        height: 110,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : FutureBuilder<Uint8List>(
-                                        future: photo.readAsBytes(),
-                                        builder: (context, snapshot) {
-                                          final bytes = snapshot.data;
-                                          if (bytes == null) {
-                                            return Container(
-                                              width: 120,
-                                              height: 110,
-                                              color: Colors.grey.shade200,
-                                            );
-                                          }
-                                          return Image.memory(
-                                            bytes,
-                                            width: 120,
-                                            height: 110,
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      ),
-                              ),
-                              Positioned(
-                                top: 6,
-                                right: 6,
-                                child: InkWell(
-                                  onTap: () {
-                                    ref
-                                        .read(reportFormDraftProvider.notifier)
-                                        .removePhotoAt(index);
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.6,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(4),
-                                    child: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Take or upload photos showing the issue clearly',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          settings: const RouteSettings(
-                            name: ReportRouteNames.step3,
-                          ),
-                          builder: (context) => const ReportStep3(),
+            const SizedBox(height: 20),
+            AddPhotoCard(onTap: _onAddPhotoTap),
+            const SizedBox(height: 24),
+            if (photos.isEmpty)
+              const EmptyPhotoState()
+            else
+              SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: photos.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final photo = photos[index];
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: kIsWeb
+                              ? Image.network(
+                                  photo.path,
+                                  width: 120,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                )
+                              : FutureBuilder<Uint8List>(
+                                  future: photo.readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    final bytes = snapshot.data;
+                                    if (bytes == null) {
+                                      return Container(
+                                        width: 120,
+                                        height: 110,
+                                        color: Colors.grey.shade200,
+                                      );
+                                    }
+                                    return Image.memory(
+                                      bytes,
+                                      width: 120,
+                                      height: 110,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
                         ),
-                      );
-                    },
-                    child: const Text('Continue'),
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: InkWell(
+                            onTap: () {
+                              ref
+                                  .read(reportFormDraftProvider.notifier)
+                                  .removePhotoAt(index);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Back'),
-                ),
-              ],
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: ReportRouteNames.step3,
+                      ),
+                      builder: (context) => const ReportStep3(),
+                    ),
+                  );
+                },
+                child: const Text('Continue'),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

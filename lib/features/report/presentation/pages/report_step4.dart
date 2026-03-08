@@ -35,152 +35,133 @@ class _ReportStep4State extends ConsumerState<ReportStep4> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
-      body: Column(
-        children: [
-          // Progress section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                ReportProgressBar(currentStep: 4, totalSteps: 6),
-              ],
-            ),
-          ),
-
-          const Divider(),
-
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            const ReportProgressBar(currentStep: 4, totalSteps: 6),
+            const SizedBox(height: 16),
+            Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Describe the Issue',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Provide clear details to help resolve it faster',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                children: const [
+                  Text(
+                    'Describe the Issue',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  const Text("Issue Title *"),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: titleController,
-                    decoration: const InputDecoration(
-                      hintText: "e.g., Large pothole causing traffic issues",
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  const Text("Detailed Description *"),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: descriptionController,
-                    maxLines: 5,
-                    maxLength: 500,
-                    decoration: const InputDecoration(
-                      hintText:
-                          "Describe the issue in detail... What is the problem? When did you notice it?",
-                    ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Provide clear details to help resolve it faster',
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // Bottom buttons
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final title = titleController.text.trim();
-                      final description = descriptionController.text.trim();
-                      if (title.isEmpty) {
-                        showMySnackBar(
-                          context: context,
-                          message: 'Issue title is required.',
-                          isError: true,
-                          icon: Icons.info_outline,
-                        );
-                        return;
-                      }
-                      if (description.isEmpty) {
-                        showMySnackBar(
-                          context: context,
-                          message: 'Detailed description is required.',
-                          isError: true,
-                          icon: Icons.info_outline,
-                        );
-                        return;
-                      }
+            const SizedBox(height: 20),
 
-                      ref
-                          .read(reportFormDraftProvider.notifier)
-                          .setIssueDetails(
-                            title: title,
-                            description: description,
-                          );
+            const Text("Issue Title *"),
+            const SizedBox(height: 6),
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                hintText: "e.g., Large pothole causing traffic issues",
+              ),
+            ),
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          settings: const RouteSettings(
-                            name: ReportRouteNames.step5,
-                          ),
-                          builder: (context) => const ReportStep5(),
-                        ),
-                      );
-                    },
-                    child: const Text("Continue"),
+            const SizedBox(height: 16),
+
+            const Text("Detailed Description *"),
+            const SizedBox(height: 6),
+            TextField(
+              controller: descriptionController,
+              maxLines: 5,
+              maxLength: 500,
+              decoration: const InputDecoration(
+                hintText:
+                    "Describe the issue in detail... What is the problem? When did you notice it?",
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Back"),
-                ),
-              ],
+                onPressed: () {
+                  final title = titleController.text.trim();
+                  final description = descriptionController.text.trim();
+                  if (title.isEmpty) {
+                    showMySnackBar(
+                      context: context,
+                      message: 'Issue title is required.',
+                      isError: true,
+                      icon: Icons.info_outline,
+                    );
+                    return;
+                  }
+                  if (description.isEmpty) {
+                    showMySnackBar(
+                      context: context,
+                      message: 'Detailed description is required.',
+                      isError: true,
+                      icon: Icons.info_outline,
+                    );
+                    return;
+                  }
+
+                  ref
+                      .read(reportFormDraftProvider.notifier)
+                      .setIssueDetails(title: title, description: description);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: ReportRouteNames.step5,
+                      ),
+                      builder: (context) => const ReportStep5(),
+                    ),
+                  );
+                },
+                child: const Text("Continue"),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Back"),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
