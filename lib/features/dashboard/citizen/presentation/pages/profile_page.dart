@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/api/api_client.dart';
+import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
+import 'package:sajilofix/core/services/storage/app_preferences.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
@@ -43,11 +45,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
     _animController!.forward();
 
+    _loadSecurityPreferences();
+
     Future.microtask(() async {
       await ref
           .read(citizenProfileControllerProvider.notifier)
           .syncCurrentUser();
     });
+  }
+
+  Future<void> _loadSecurityPreferences() async {
+    final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 0);
+    if (!mounted) return;
+    setState(() => _biometricLock = enabled);
+  }
+
+  Future<void> _toggleBiometric(bool enabled) async {
+    if (enabled) {
+      final ok = await BiometricService().authenticate(
+        reason: 'Confirm to enable biometric login',
+      );
+      if (!ok) {
+        showMySnackBar(
+          context: context,
+          message: 'Biometric authentication failed',
+          isError: true,
+        );
+        return;
+      }
+    }
+
+    setState(() => _biometricLock = enabled);
+    await AppPreferences.setBiometricEnabled(roleIndex: 0, enabled: enabled);
   }
 
   @override
@@ -374,7 +403,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           key: const ValueKey(3),
           biometricLock: _biometricLock,
           autoLogout: _autoLogout,
-          onBiometricChanged: (v) => setState(() => _biometricLock = v),
+          onBiometricChanged: _toggleBiometric,
           onAutoLogoutChanged: (v) => setState(() => _autoLogout = v),
           onChangePassword: () => showMySnackBar(
             context: context,

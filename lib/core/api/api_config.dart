@@ -5,24 +5,6 @@ import 'package:flutter/foundation.dart';
 class ApiConfig {
   ApiConfig._();
 
-  // // For mobile development, base URLs differ by device:
-  // // - Android emulator: http://10.0.2.2:4000
-  // // - iOS simulator:    http://localhost:4000
-  // // - For Physical Device use your computer's IP: 'http://192.168.x.x:5000'
-  // // - ApiConfig owns the environment base URL (via --dart-define).
-  // static const String baseUrl = String.fromEnvironment(
-  //   'SAJILOFIX_API_BASE_URL',
-  //   defaultValue: 'http://localhost:4000',
-  // );
-  // //http://172.26.18.142:4000
-  // static Uri uriForPath(String path) {
-  //   final normalizedBase = baseUrl.endsWith('/')
-  //       ? baseUrl.substring(0, baseUrl.length - 1)
-  //       : baseUrl;
-  //   final normalizedPath = path.startsWith('/') ? path : '/$path';
-  //   return Uri.parse('$normalizedBase$normalizedPath');
-  // }
-
   // Example: --dart-define=SAJILOFIX_API_BASE_URL=http://192.168.1.10:4000
   static const String _definedBaseUrl = String.fromEnvironment(
     'SAJILOFIX_API_BASE_URL',
@@ -33,7 +15,7 @@ class ApiConfig {
   // Example: --dart-define=SAJILOFIX_API_HOST=192.168.1.10
   static const String _definedHost = String.fromEnvironment(
     'SAJILOFIX_API_HOST',
-    defaultValue: '',
+    defaultValue: '192.168.0.105',
   );
 
   // Port override.
@@ -46,13 +28,13 @@ class ApiConfig {
   // Example: --dart-define=SAJILOFIX_IS_PHYSICAL_DEVICE=true
   static const bool isPhysicalDevice = bool.fromEnvironment(
     'SAJILOFIX_IS_PHYSICAL_DEVICE',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   // Fallback IP for physical device if you didn't pass SAJILOFIX_API_HOST.
   static const String _fallbackIpAddress = String.fromEnvironment(
     'SAJILOFIX_FALLBACK_IP',
-    defaultValue: '10.1.20.220',
+    defaultValue: '192.168.0.105',
   );
 
   static int get port => _definedPort;
@@ -68,7 +50,13 @@ class ApiConfig {
     }
 
     if (kIsWeb || Platform.isIOS) return 'localhost';
-    if (Platform.isAndroid) return '10.0.2.2';
+    if (Platform.isAndroid) {
+      // If fallback IP is provided, prefer it so physical-device runs work
+      // without requiring SAJILOFIX_IS_PHYSICAL_DEVICE=true.
+      if (_fallbackIpAddress.trim().isNotEmpty)
+        return _fallbackIpAddress.trim();
+      return '10.0.2.2';
+    }
     return 'localhost';
   }
 

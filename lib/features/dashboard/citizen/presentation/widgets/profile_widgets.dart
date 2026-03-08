@@ -802,11 +802,11 @@ class ProfileSecuritySection extends StatelessWidget {
           subtitle: const Text('Update your account password'),
           trailing: const Icon(Icons.chevron_right_rounded),
         ),
-        SwitchListTile.adaptive(
+        _BiometricToggleTile(
           value: biometricLock,
           onChanged: onBiometricChanged,
-          title: const Text('Biometric lock'),
-          subtitle: const Text('Fingerprint / face unlock'),
+          title: 'Biometric login',
+          subtitle: 'Unlock with fingerprint or face ID',
         ),
         SwitchListTile.adaptive(
           value: autoLogout,
@@ -815,6 +815,113 @@ class ProfileSecuritySection extends StatelessWidget {
           subtitle: const Text('Log out after inactivity'),
         ),
       ],
+    );
+  }
+}
+
+class BiometricOnlySection extends StatelessWidget {
+  final bool biometricLock;
+  final ValueChanged<bool> onBiometricChanged;
+
+  const BiometricOnlySection({
+    super.key,
+    required this.biometricLock,
+    required this.onBiometricChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ProfileSettingsCard(
+      icon: Icons.lock_outline,
+      title: 'Security',
+      children: [
+        _BiometricToggleTile(
+          value: biometricLock,
+          onChanged: onBiometricChanged,
+          title: 'Biometric login',
+          subtitle: 'Unlock with fingerprint or face ID',
+        ),
+      ],
+    );
+  }
+}
+
+class _BiometricToggleTile extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String title;
+  final String subtitle;
+
+  const _BiometricToggleTile({
+    required this.value,
+    required this.onChanged,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB);
+    final gradient = isDark
+        ? const LinearGradient(
+            colors: [Color(0xFF0B1324), Color(0xFF14223D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : const LinearGradient(
+            colors: [Color(0xFFE8F1FF), Color(0xFFF9FBFF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.fingerprint, color: accent, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
     );
   }
 }

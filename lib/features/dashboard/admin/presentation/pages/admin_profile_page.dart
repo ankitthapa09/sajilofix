@@ -1,17 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
+import 'package:sajilofix/core/services/storage/app_preferences.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
 import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AdminProfileScreen extends ConsumerWidget {
+class AdminProfileScreen extends ConsumerStatefulWidget {
   const AdminProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminProfileScreen> createState() => _AdminProfileScreenState();
+}
+
+class _AdminProfileScreenState extends ConsumerState<AdminProfileScreen> {
+  bool _biometricLock = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSecurityPreferences();
+  }
+
+  Future<void> _loadSecurityPreferences() async {
+    final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 1);
+    if (!mounted) return;
+    setState(() => _biometricLock = enabled);
+  }
+
+  Future<void> _toggleBiometric(bool enabled) async {
+    if (enabled) {
+      final ok = await BiometricService().authenticate(
+        reason: 'Confirm to enable biometric login',
+      );
+      if (!ok) {
+        showMySnackBar(
+          context: context,
+          message: 'Biometric authentication failed',
+          isError: true,
+        );
+        return;
+      }
+    }
+
+    setState(() => _biometricLock = enabled);
+    await AppPreferences.setBiometricEnabled(roleIndex: 1, enabled: enabled);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final currentUserAsync = ref.watch(currentUserProvider);
@@ -78,16 +119,9 @@ class AdminProfileScreen extends ConsumerWidget {
                     onTap: () =>
                         Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
-                  _ProfileActionTile(
-                    icon: Icons.security_outlined,
-                    title: 'Security',
-                    subtitle: 'Password and device protection',
-                    onTap: () {
-                      showMySnackBar(
-                        context: context,
-                        message: 'Security options coming soon',
-                      );
-                    },
+                  BiometricOnlySection(
+                    biometricLock: _biometricLock,
+                    onBiometricChanged: _toggleBiometric,
                   ),
                   const SizedBox(height: 8),
                   _ProfileActionTile(
