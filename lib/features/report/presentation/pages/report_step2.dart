@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -184,78 +182,130 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
               ),
             ),
             const SizedBox(height: 20),
-            AddPhotoCard(onTap: _onAddPhotoTap),
-            const SizedBox(height: 24),
-            if (photos.isEmpty)
-              const EmptyPhotoState()
-            else
-              SizedBox(
-                height: 110,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: photos.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final photo = photos[index];
-                    return Stack(
-                      children: [
-                        ClipRRect(
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE5E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8EEFF),
                           borderRadius: BorderRadius.circular(14),
-                          child: kIsWeb
-                              ? Image.network(
-                                  photo.path,
-                                  width: 120,
-                                  height: 110,
-                                  fit: BoxFit.cover,
-                                )
-                              : FutureBuilder<Uint8List>(
-                                  future: photo.readAsBytes(),
-                                  builder: (context, snapshot) {
-                                    final bytes = snapshot.data;
-                                    if (bytes == null) {
-                                      return Container(
-                                        width: 120,
-                                        height: 110,
-                                        color: Colors.grey.shade200,
-                                      );
-                                    }
-                                    return Image.memory(
-                                      bytes,
-                                      width: 120,
-                                      height: 110,
-                                      fit: BoxFit.cover,
-                                    );
-                                  },
-                                ),
                         ),
-                        Positioned(
-                          top: 6,
-                          right: 6,
-                          child: InkWell(
-                            onTap: () {
-                              ref
-                                  .read(reportFormDraftProvider.notifier)
-                                  .removePhotoAt(index);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.6),
-                                shape: BoxShape.circle,
-                              ),
-                              padding: const EdgeInsets.all(4),
-                              child: const Icon(
-                                Icons.close,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
+                        child: const Icon(
+                          Icons.photo_camera_outlined,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Evidence Photos',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: Color(0xFFE6EAF2)),
+                  const SizedBox(height: 14),
+                  AddPhotoCard(onTap: _onAddPhotoTap),
+                  const SizedBox(height: 16),
+                  if (photos.isEmpty)
+                    const EmptyPhotoState()
+                  else
+                    SizedBox(
+                      height: 110,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: photos.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final photo = photos[index];
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: kIsWeb
+                                    ? Image.network(
+                                        photo.path,
+                                        width: 120,
+                                        height: 110,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : FutureBuilder<Uint8List>(
+                                        future: photo.readAsBytes(),
+                                        builder: (context, snapshot) {
+                                          final bytes = snapshot.data;
+                                          if (bytes == null) {
+                                            return Container(
+                                              width: 120,
+                                              height: 110,
+                                              color: Colors.grey.shade200,
+                                            );
+                                          }
+                                          return Image.memory(
+                                            bytes,
+                                            width: 120,
+                                            height: 110,
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      ),
+                              ),
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: InkWell(
+                                  onTap: () {
+                                    ref
+                                        .read(reportFormDraftProvider.notifier)
+                                        .removePhotoAt(index);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,

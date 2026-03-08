@@ -270,22 +270,9 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
 
           const SizedBox(height: 16),
 
-          TextField(
+          _SearchInputCard(
             controller: _searchController,
-            decoration: InputDecoration(
-              labelText: 'Search location',
-              hintText: 'Type a place name or address',
-              suffixIcon: _loadingSearch
-                  ? const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : const Icon(Icons.search),
-            ),
+            loading: _loadingSearch,
           ),
 
           if (_searchResults.isNotEmpty) ...[
@@ -344,53 +331,12 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
 
           const SizedBox(height: 16),
 
-          TextField(
-            controller: _addressController,
-            decoration: const InputDecoration(
-              labelText: 'Address *',
-              hintText: 'Street, area, or nearby address',
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          TextField(
-            controller: _municipalityController,
-            decoration: const InputDecoration(
-              labelText: 'Municipality *',
-              hintText: 'Enter municipality/city',
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          TextField(
-            controller: _districtController,
-            decoration: const InputDecoration(
-              labelText: 'District *',
-              hintText: 'Enter district',
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          TextField(
-            controller: _wardController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Ward *',
-              hintText: 'Enter ward number',
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          TextField(
-            controller: _landmarkController,
-            decoration: const InputDecoration(
-              labelText: 'Landmark *',
-              hintText: 'Enter a nearby landmark or address',
-            ),
+          _LocationInputCard(
+            addressController: _addressController,
+            municipalityController: _municipalityController,
+            districtController: _districtController,
+            wardController: _wardController,
+            landmarkController: _landmarkController,
           ),
 
           const SizedBox(height: 24),
@@ -492,6 +438,259 @@ class _ReportStep3State extends ConsumerState<ReportStep3> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SearchInputCard extends StatelessWidget {
+  final TextEditingController controller;
+  final bool loading;
+
+  const _SearchInputCard({required this.controller, required this.loading});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEDEFF5),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: 'Search a place or address...',
+          hintStyle: const TextStyle(
+            color: Color(0xFFB6BDCA),
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: Color(0xFF9CA3AF),
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(26),
+            borderSide: const BorderSide(color: Color(0xFF3A45D0), width: 2.2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(26),
+            borderSide: const BorderSide(color: Color(0xFF2A38D7), width: 2.4),
+          ),
+          suffixIcon: loading
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationInputCard extends StatelessWidget {
+  final TextEditingController addressController;
+  final TextEditingController municipalityController;
+  final TextEditingController districtController;
+  final TextEditingController wardController;
+  final TextEditingController landmarkController;
+
+  const _LocationInputCard({
+    required this.addressController,
+    required this.municipalityController,
+    required this.districtController,
+    required this.wardController,
+    required this.landmarkController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFE5E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDDF0EA),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.edit_location_alt_rounded,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Address Details',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Divider(height: 1, color: Color(0xFFE6EAF2)),
+          const SizedBox(height: 14),
+          _IconInputField(
+            controller: addressController,
+            labelText: 'Address',
+            hintText: 'Street, area, or nearby address',
+            icon: Icons.home_outlined,
+            iconColor: const Color(0xFF2563EB),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _IconInputField(
+                  controller: municipalityController,
+                  labelText: 'Municipality',
+                  hintText: 'City / VDC',
+                  icon: Icons.location_city_outlined,
+                  iconColor: const Color(0xFF7C3AED),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _IconInputField(
+                  controller: districtController,
+                  labelText: 'District',
+                  hintText: 'District',
+                  icon: Icons.map_outlined,
+                  iconColor: const Color(0xFF0891B2),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _IconInputField(
+                  controller: wardController,
+                  labelText: 'Ward No.',
+                  hintText: 'e.g. 12',
+                  icon: Icons.numbers,
+                  iconColor: const Color(0xFFF97316),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _IconInputField(
+                  controller: landmarkController,
+                  labelText: 'Landmark',
+                  hintText: 'Nearby landmark',
+                  icon: Icons.flag_outlined,
+                  iconColor: const Color(0xFFEF4444),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String labelText;
+  final String hintText;
+  final IconData icon;
+  final Color iconColor;
+  final TextInputType? keyboardType;
+
+  const _IconInputField({
+    required this.controller,
+    required this.labelText,
+    required this.hintText,
+    required this.icon,
+    required this.iconColor,
+    this.keyboardType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          labelText,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF8F97A6),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A),
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Color(0xFFB6BDCA),
+              fontWeight: FontWeight.w600,
+            ),
+            prefixIcon: Icon(icon, size: 22, color: iconColor),
+            filled: true,
+            fillColor: const Color(0xFFF3F5FA),
+            contentPadding: const EdgeInsets.symmetric(vertical: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(color: Color(0xFFE4E7EF)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(color: Color(0xFFE4E7EF)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: iconColor.withValues(alpha: 0.5)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
