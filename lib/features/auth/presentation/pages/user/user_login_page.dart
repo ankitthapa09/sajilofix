@@ -7,6 +7,7 @@ import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/authority/presentation/providers/authority_issues_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class UserLoginScreen extends ConsumerStatefulWidget {
@@ -199,6 +200,8 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                             ref.invalidate(currentUserProvider);
                             ref.invalidate(myReportsProvider);
                             ref.invalidate(citizenHomeStatsProvider);
+                            ref.invalidate(unreadCountProvider);
+                            ref.invalidate(notificationsControllerProvider);
                             if (roleIndex == 2) {
                               ref.invalidate(authorityIssuesControllerProvider);
                             }

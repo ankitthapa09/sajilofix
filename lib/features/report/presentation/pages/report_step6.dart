@@ -140,6 +140,7 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
       );
 
       ref.read(reportFormDraftProvider.notifier).reset();
+      ref.invalidate(myReportsProvider);
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
         (route) => false,

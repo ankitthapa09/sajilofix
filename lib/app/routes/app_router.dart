@@ -12,6 +12,7 @@ import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboar
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page2.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page3.dart';
+import 'package:sajilofix/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:sajilofix/features/splash/presentation/splash_page.dart';
 
 class AppRouter {
@@ -72,6 +73,9 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AuthorityDashboard(initialIndex: initialIndex),
         );
+
+      case AppRoutes.notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsPage());
 
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());

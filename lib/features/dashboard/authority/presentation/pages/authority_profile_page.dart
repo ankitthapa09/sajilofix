@@ -5,6 +5,7 @@ import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/authority/presentation/providers/authority_issues_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 
 class AuthorityProfileScreen extends ConsumerWidget {
   const AuthorityProfileScreen({super.key});
@@ -73,10 +74,8 @@ class AuthorityProfileScreen extends ConsumerWidget {
                     icon: Icons.notifications_active_outlined,
                     title: 'Alerts',
                     subtitle: 'Issue alerts and reminders',
-                    onTap: () => showMySnackBar(
-                      context: context,
-                      message: 'Alerts coming soon',
-                    ),
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
                   _ProfileActionTile(
                     icon: Icons.security_outlined,
@@ -96,6 +95,8 @@ class AuthorityProfileScreen extends ConsumerWidget {
                       await ref.read(authRepositoryProvider).logout();
                       ref.invalidate(currentUserProvider);
                       ref.invalidate(authorityIssuesControllerProvider);
+                      ref.invalidate(unreadCountProvider);
+                      ref.invalidate(notificationsControllerProvider);
                       if (!context.mounted) return;
                       Navigator.pushNamedAndRemoveUntil(
                         context,

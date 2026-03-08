@@ -9,6 +9,7 @@ import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_view_page.dart';
 import 'package:sajilofix/features/dashboard/authority/presentation/providers/authority_issues_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 
 class AuthorityOverviewScreen extends ConsumerWidget {
   const AuthorityOverviewScreen({super.key});
@@ -21,6 +22,8 @@ class AuthorityOverviewScreen extends ConsumerWidget {
     final muted = onSurface.withValues(alpha: 0.6);
     final primary = theme.colorScheme.primary;
     final issuesAsync = ref.watch(authorityIssuesControllerProvider);
+    final unreadAsync = ref.watch(unreadCountProvider);
+    final unreadCount = unreadAsync.valueOrNull ?? 0;
 
     return Scaffold(
       backgroundColor: isDark
@@ -43,6 +46,70 @@ class AuthorityOverviewScreen extends ConsumerWidget {
                       ),
                     ),
                     const Spacer(),
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.notifications),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1E2330)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              Icons.notifications_outlined,
+                              size: 22,
+                              color: onSurface.withValues(alpha: 0.7),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 1,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEF4444),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    unreadCount > 99
+                                        ? '99+'
+                                        : unreadCount.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     _GlowChip(label: 'Authority', tone: primary),
                   ],
                 ),

@@ -3,6 +3,7 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -74,12 +75,8 @@ class AdminProfileScreen extends ConsumerWidget {
                     icon: Icons.notifications_active_outlined,
                     title: 'Notifications',
                     subtitle: 'Review alerts and reminders',
-                    onTap: () {
-                      showMySnackBar(
-                        context: context,
-                        message: 'Notifications coming soon',
-                      );
-                    },
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
                   _ProfileActionTile(
                     icon: Icons.security_outlined,
@@ -101,6 +98,8 @@ class AdminProfileScreen extends ConsumerWidget {
                       await ref.read(authRepositoryProvider).logout();
                       ref.invalidate(currentUserProvider);
                       ref.invalidate(adminIssuesControllerProvider);
+                      ref.invalidate(unreadCountProvider);
+                      ref.invalidate(notificationsControllerProvider);
                       if (!context.mounted) return;
                       Navigator.pushNamedAndRemoveUntil(
                         context,

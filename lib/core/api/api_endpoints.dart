@@ -36,4 +36,11 @@ class ApiEndpoints {
   static const String adminAuthorityById = ApiPaths.adminAuthorityById;
   static const String adminCitizens = ApiPaths.adminCitizens;
   static const String adminCitizenById = ApiPaths.adminCitizenById;
+
+  // Notifications
+  static const String notifications = ApiPaths.notifications;
+  static const String notificationsUnreadCount =
+      ApiPaths.notificationsUnreadCount;
+  static const String notificationsReadAll = ApiPaths.notificationsReadAll;
+  static const String notificationById = ApiPaths.notificationById;
 }

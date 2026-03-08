@@ -27,4 +27,11 @@ class ApiPaths {
   static const String adminAuthorityById = '/api/admin/authorities/';
   static const String adminCitizens = '/api/admin/citizens';
   static const String adminCitizenById = '/api/admin/citizens/';
+
+  // Notifications
+  static const String notifications = '/api/notifications';
+  static const String notificationsUnreadCount =
+      '/api/notifications/unread-count';
+  static const String notificationsReadAll = '/api/notifications/read-all';
+  static const String notificationById = '/api/notifications/';
 }

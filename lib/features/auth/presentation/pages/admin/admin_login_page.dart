@@ -5,6 +5,7 @@ import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
@@ -183,6 +184,8 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
                             ref.invalidate(currentUserProvider);
                             ref.invalidate(adminIssuesControllerProvider);
+                            ref.invalidate(unreadCountProvider);
+                            ref.invalidate(notificationsControllerProvider);
 
                             if (!context.mounted) return;
                             showMySnackBar(

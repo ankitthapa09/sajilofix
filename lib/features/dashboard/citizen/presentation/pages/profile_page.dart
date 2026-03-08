@@ -13,6 +13,7 @@ import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citi
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_profile_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_edit_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -212,6 +213,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       ref.invalidate(myReportsProvider);
       ref.invalidate(citizenHomeStatsProvider);
       ref.invalidate(adminIssuesControllerProvider);
+      ref.invalidate(unreadCountProvider);
+      ref.invalidate(notificationsControllerProvider);
       ref.read(reportFormDraftProvider.notifier).reset();
       if (!mounted) return;
       Navigator.of(
