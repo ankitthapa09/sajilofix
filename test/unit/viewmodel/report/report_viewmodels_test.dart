@@ -124,4 +124,30 @@ void main() {
     expect(notifier.state.urgency, isNull);
     expect(notifier.state.photos, isEmpty);
   });
+
+  test('setLocation does not overwrite existing category', () {
+    final notifier = ReportFormDraftNotifier();
+    notifier.setCategory('Water Supply');
+
+    notifier.setLocation(
+      title: 'Location A',
+      subtitle: 'Metro City',
+      district: 'Lalitpur',
+      ward: '7',
+    );
+
+    expect(notifier.state.category, 'Water Supply');
+    expect(notifier.state.locationTitle, 'Location A');
+  });
+
+  test('setPhotos replaces previous photo list', () {
+    final notifier = ReportFormDraftNotifier();
+    notifier.setPhotos([XFile('/tmp/first.jpg')]);
+
+    notifier.setPhotos([XFile('/tmp/second.jpg'), XFile('/tmp/third.jpg')]);
+
+    expect(notifier.state.photos.length, 2);
+    expect(notifier.state.photos[0].path, '/tmp/second.jpg');
+    expect(notifier.state.photos[1].path, '/tmp/third.jpg');
+  });
 }

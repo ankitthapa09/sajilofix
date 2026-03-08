@@ -110,4 +110,16 @@ void main() {
       throwsA(isA<StateError>()),
     );
   });
+
+  test('SubmitReportUseCase preserves category and urgency values', () async {
+    final repo = _FakeReportRepository()..submitResult = _sampleReport();
+    final useCase = SubmitReportUseCase(repo);
+    final input = _sampleInput();
+
+    await useCase(input);
+
+    expect(repo.lastSubmitInput, isNotNull);
+    expect(repo.lastSubmitInput!.category, 'ROAD');
+    expect(repo.lastSubmitInput!.urgency, 'MEDIUM');
+  });
 }
