@@ -5,6 +5,8 @@ import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class UserLoginScreen extends ConsumerStatefulWidget {
   const UserLoginScreen({super.key});
@@ -194,6 +196,8 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                                 );
 
                             ref.invalidate(currentUserProvider);
+                            ref.invalidate(myReportsProvider);
+                            ref.invalidate(citizenHomeStatsProvider);
 
                             if (!context.mounted) return;
                             showMySnackBar(

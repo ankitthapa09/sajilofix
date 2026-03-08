@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sajilofix/core/services/storage/user_session_service.dart';
 import 'package:sajilofix/core/services/network/network_info.dart';
 import 'package:sajilofix/features/auth/data/datasources/local/auth_local_datasource.dart';
@@ -12,13 +14,18 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource _local;
   final IAuthRemoteDataSource? _remote;
   final INetworkInfo? _networkInfo;
+  final FlutterSecureStorage? _storage;
+
+  static const String _tokenKey = 'auth_token';
 
   const AuthRepositoryImpl(
     this._local, {
     IAuthRemoteDataSource? remote,
     INetworkInfo? networkInfo,
+    FlutterSecureStorage? storage,
   }) : _remote = remote,
-       _networkInfo = networkInfo;
+       _networkInfo = networkInfo,
+       _storage = storage;
 
   Future<bool> _isOnline() async {
     final networkInfo = _networkInfo;
@@ -208,5 +215,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() => UserSessionService.clear();
+  Future<void> logout() async {
+    await UserSessionService.clear();
+    if (kIsWeb) return;
+    try {
+      final storage = _storage ?? const FlutterSecureStorage();
+      await storage.delete(key: _tokenKey);
+    } catch (_) {
+      // Best-effort token cleanup only.
+    }
+  }
 }

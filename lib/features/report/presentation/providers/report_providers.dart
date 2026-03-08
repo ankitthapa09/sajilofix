@@ -136,9 +136,12 @@ class AdminIssuesController
                     description: issue.description,
                     urgency: issue.urgency,
                     status: updatedStatus,
+                    statusUpdatedByRole: issue.statusUpdatedByRole,
+                    statusUpdatedAt: issue.statusUpdatedAt,
                     location: issue.location,
                     photos: issue.photos,
                     createdAt: issue.createdAt,
+                    reporter: issue.reporter,
                   )
                 : issue,
           )

@@ -70,9 +70,12 @@ class IssueReportApiModel {
   final String description;
   final String urgency;
   final String status;
+  final String? statusUpdatedByRole;
+  final DateTime? statusUpdatedAt;
   final IssueLocationApiModel location;
   final List<String> photos;
   final DateTime? createdAt;
+  final ReporterInfoApiModel? reporter;
 
   const IssueReportApiModel({
     required this.id,
@@ -81,12 +84,16 @@ class IssueReportApiModel {
     required this.description,
     required this.urgency,
     required this.status,
+    this.statusUpdatedByRole,
+    this.statusUpdatedAt,
     required this.location,
     required this.photos,
     this.createdAt,
+    this.reporter,
   });
 
   factory IssueReportApiModel.fromJson(Map<String, dynamic> json) {
+    final reporterMap = ReporterInfoApiModel.extract(json);
     return IssueReportApiModel(
       id: (json['id'] ?? json['_id'] ?? '').toString(),
       category: (json['category'] ?? '').toString(),
@@ -94,12 +101,27 @@ class IssueReportApiModel {
       description: (json['description'] ?? '').toString(),
       urgency: (json['urgency'] ?? '').toString(),
       status: (json['status'] ?? '').toString(),
+      statusUpdatedByRole: _readString(json, [
+        'statusUpdatedByRole',
+        'status_updated_by_role',
+        'updatedByRole',
+      ]),
+      statusUpdatedAt: _tryParseDateTime(
+        json['statusUpdatedAt'] ??
+            json['status_updated_at'] ??
+            json['statusUpdated'] ??
+            json['status_updated'] ??
+            json['updatedAt'],
+      ),
       location: IssueLocationApiModel.fromJson(
         (json['location'] as Map?)?.cast<String, dynamic>() ??
             const <String, dynamic>{},
       ),
       photos: _asStringList(json['photos']),
       createdAt: _tryParseDateTime(json['createdAt']),
+      reporter: reporterMap == null
+          ? null
+          : ReporterInfoApiModel.fromJson(reporterMap),
     );
   }
 
@@ -111,9 +133,12 @@ class IssueReportApiModel {
       description: description,
       urgency: urgency,
       status: status,
+      statusUpdatedByRole: statusUpdatedByRole,
+      statusUpdatedAt: statusUpdatedAt,
       location: location.toEntity(),
       photos: photos,
       createdAt: createdAt,
+      reporter: reporter?.toEntity(),
     );
   }
 
@@ -130,5 +155,88 @@ class IssueReportApiModel {
     final s = value.toString().trim();
     if (s.isEmpty) return null;
     return DateTime.tryParse(s);
+  }
+
+  static String? _readString(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value == null) continue;
+      final str = value.toString().trim();
+      if (str.isNotEmpty) return str;
+    }
+    return null;
+  }
+}
+
+class ReporterInfoApiModel {
+  final String id;
+  final String fullName;
+  final String? email;
+  final String? phone;
+  final String? status;
+  final String? profilePhoto;
+
+  const ReporterInfoApiModel({
+    required this.id,
+    required this.fullName,
+    this.email,
+    this.phone,
+    this.status,
+    this.profilePhoto,
+  });
+
+  factory ReporterInfoApiModel.fromJson(Map<String, dynamic> json) {
+    return ReporterInfoApiModel(
+      id: (json['id'] ?? json['_id'] ?? '').toString(),
+      fullName: (json['fullName'] ?? json['name'] ?? '').toString(),
+      email: json['email']?.toString(),
+      phone: json['phone']?.toString(),
+      status: json['status']?.toString(),
+      profilePhoto: (json['profilePhoto'] ?? json['avatar'] ?? json['photo'])
+          ?.toString(),
+    );
+  }
+
+  ReporterInfo toEntity() {
+    return ReporterInfo(
+      id: id,
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      status: status,
+      profilePhoto: profilePhoto,
+    );
+  }
+
+  static Map<String, dynamic>? extract(Map<String, dynamic> json) {
+    final candidates = [
+      json['reporter'],
+      json['reportedBy'],
+      json['createdBy'],
+      json['user'],
+      json['citizen'],
+      json['author'],
+      json['owner'],
+    ];
+
+    for (final value in candidates) {
+      if (value is Map) {
+        return value.cast<String, dynamic>();
+      }
+    }
+
+    final reporterId = json['reporterId'] ?? json['reporter_id'];
+    final reporterName = json['reporterName'] ?? json['reporter_name'];
+    final reporterPhoto = json['reporterPhoto'] ?? json['reporter_photo'];
+    if (reporterId != null || reporterName != null || reporterPhoto != null) {
+      return <String, dynamic>{
+        '_id': reporterId,
+        'id': reporterId,
+        'fullName': reporterName ?? '',
+        'profilePhoto': reporterPhoto,
+      };
+    }
+
+    return null;
   }
 }

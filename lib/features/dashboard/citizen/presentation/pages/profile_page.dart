@@ -9,9 +9,11 @@ import 'package:sajilofix/core/api/api_client.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_profile_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_edit_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -207,6 +209,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     try {
       await ref.read(authRepositoryProvider).logout();
       ref.invalidate(currentUserProvider);
+      ref.invalidate(myReportsProvider);
+      ref.invalidate(citizenHomeStatsProvider);
+      ref.invalidate(adminIssuesControllerProvider);
+      ref.read(reportFormDraftProvider.notifier).reset();
       if (!mounted) return;
       Navigator.of(
         context,

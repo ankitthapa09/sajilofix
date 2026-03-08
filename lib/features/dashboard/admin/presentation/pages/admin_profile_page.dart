@@ -3,6 +3,7 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AdminProfileScreen extends ConsumerWidget {
@@ -98,6 +99,8 @@ class AdminProfileScreen extends ConsumerWidget {
                     subtitle: 'Sign out of admin session',
                     onTap: () async {
                       await ref.read(authRepositoryProvider).logout();
+                      ref.invalidate(currentUserProvider);
+                      ref.invalidate(adminIssuesControllerProvider);
                       if (!context.mounted) return;
                       Navigator.pushNamedAndRemoveUntil(
                         context,
