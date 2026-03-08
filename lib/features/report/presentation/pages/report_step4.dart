@@ -5,6 +5,7 @@ import 'package:sajilofix/features/report/presentation/widgets/navigation/report
 import 'package:sajilofix/features/report/presentation/pages/report_step5.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 import 'package:sajilofix/features/report/presentation/routes/report_route_names.dart';
+import 'package:sajilofix/features/report/presentation/widgets/navigation/report_app_bar.dart';
 
 class ReportStep4 extends ConsumerStatefulWidget {
   const ReportStep4({super.key});
@@ -35,7 +36,8 @@ class _ReportStep4State extends ConsumerState<ReportStep4> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(), title: const Text("Report Issue")),
+      appBar: const ReportAppBar(title: 'Report Issue'),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: Column(
         children: [
           // Progress section
@@ -58,14 +60,36 @@ class _ReportStep4State extends ConsumerState<ReportStep4> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Describe the Issue",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    "Provide clear details to help resolve it faster",
-                    style: TextStyle(color: Colors.grey),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Describe the Issue',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Provide clear details to help resolve it faster',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
 
                   const SizedBox(height: 20),

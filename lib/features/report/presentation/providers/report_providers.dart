@@ -85,7 +85,7 @@ final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
 });
 
 final myReportsProvider = FutureProvider<List<IssueReport>>((ref) async {
-  return ref.read(reportRepositoryProvider).listReports();
+  return ref.read(reportRepositoryProvider).listMyReports();
 });
 
 final adminIssuesControllerProvider =
@@ -103,7 +103,7 @@ class AdminIssuesController
 
   Future<void> load() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(_repository.listReports);
+    state = await AsyncValue.guard(_repository.listAllReports);
   }
 
   Future<void> refresh() async {
@@ -136,9 +136,12 @@ class AdminIssuesController
                     description: issue.description,
                     urgency: issue.urgency,
                     status: updatedStatus,
+                    statusUpdatedByRole: issue.statusUpdatedByRole,
+                    statusUpdatedAt: issue.statusUpdatedAt,
                     location: issue.location,
                     photos: issue.photos,
                     createdAt: issue.createdAt,
+                    reporter: issue.reporter,
                   )
                 : issue,
           )

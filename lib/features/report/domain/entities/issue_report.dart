@@ -27,9 +27,12 @@ class IssueReport {
   final String description;
   final String urgency;
   final String status;
+  final String? statusUpdatedByRole;
+  final DateTime? statusUpdatedAt;
   final IssueLocation location;
   final List<String> photos;
   final DateTime? createdAt;
+  final ReporterInfo? reporter;
 
   const IssueReport({
     required this.id,
@@ -38,9 +41,30 @@ class IssueReport {
     required this.description,
     required this.urgency,
     required this.status,
+    this.statusUpdatedByRole,
+    this.statusUpdatedAt,
     required this.location,
     required this.photos,
     this.createdAt,
+    this.reporter,
+  });
+}
+
+class ReporterInfo {
+  final String id;
+  final String fullName;
+  final String? email;
+  final String? phone;
+  final String? status;
+  final String? profilePhoto;
+
+  const ReporterInfo({
+    required this.id,
+    required this.fullName,
+    this.email,
+    this.phone,
+    this.status,
+    this.profilePhoto,
   });
 }
 

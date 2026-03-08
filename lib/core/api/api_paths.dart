@@ -18,6 +18,8 @@ class ApiPaths {
   // Issues
   static const String issues = '/api/issues';
   static const String issueById = '/api/issues/';
+  static const String issueReverseGeocode = '/api/issues/reverse-geocode';
+  static const String issueSearchLocation = '/api/issues/search-location';
 
   // Admin
   static const String adminUsers = '/api/admin/users';

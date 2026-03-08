@@ -8,6 +8,7 @@ import 'package:sajilofix/core/api/api_client.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/api/api_exception.dart';
 import 'package:sajilofix/features/report/data/models/report_api_model.dart';
+import 'package:sajilofix/features/report/domain/entities/geo_address.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 
 class ReportRemoteDatasource {
@@ -40,9 +41,14 @@ class ReportRemoteDatasource {
     }
   }
 
-  Future<List<IssueReport>> listIssues() async {
+  Future<List<IssueReport>> listIssues({String? scope}) async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.issues);
+      final response = await _apiClient.get(
+        ApiEndpoints.issues,
+        queryParameters: <String, dynamic>{
+          if ((scope ?? '').trim().isNotEmpty) 'scope': scope?.trim(),
+        },
+      );
       final data = _asJsonMap(response.data);
       final payload = data['data'];
       if (payload is List) {
@@ -89,6 +95,50 @@ class ReportRemoteDatasource {
   Future<void> deleteIssue(String id) async {
     try {
       await _apiClient.delete('${ApiEndpoints.issueById}$id');
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
+  Future<GeoAddress> reverseGeocode({
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.issueReverseGeocode,
+        queryParameters: <String, dynamic>{'lat': latitude, 'lng': longitude},
+      );
+      final data = _asJsonMap(response.data);
+      final payload = _asJsonMap(data['data']);
+      return GeoAddress.fromJson(payload);
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
+  Future<List<GeoAddress>> searchLocations({
+    required String query,
+    int limit = 6,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.issueSearchLocation,
+        queryParameters: <String, dynamic>{'q': query, 'limit': limit},
+      );
+      final data = _asJsonMap(response.data);
+      final payload = data['data'];
+      if (payload is List) {
+        return payload
+            .whereType<Map>()
+            .map((e) => GeoAddress.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+      return const [];
     } on DioException catch (e) {
       throw _toApiException(e);
     } catch (e) {
