@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_dashboard_page.dart';
+import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_dashboard_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 //import 'package:sajilofix/screens/signup_screen.dart';
@@ -51,9 +53,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (!mounted) return;
 
       if (user != null) {
-        Navigator.of(context).pushReplacement(
-          _smoothFadeRoute(const CitizenDashboard(initialIndex: 0)),
-        );
+        final next = switch (user.roleIndex) {
+          1 => const AdminDashboard(initialIndex: 0),
+          2 => const AuthorityDashboard(initialIndex: 0),
+          _ => const CitizenDashboard(initialIndex: 0),
+        };
+        Navigator.of(context).pushReplacement(_smoothFadeRoute(next));
       } else {
         Navigator.of(
           context,

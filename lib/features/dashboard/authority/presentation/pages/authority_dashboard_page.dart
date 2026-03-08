@@ -4,36 +4,33 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/services/storage/user_session_service.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
-import 'package:sajilofix/features/dashboard/citizen/presentation/pages/home_page.dart';
-import 'package:sajilofix/features/dashboard/citizen/presentation/pages/myreport_page.dart';
-import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_page.dart';
-import 'package:sajilofix/features/report/presentation/pages/report_step1.dart';
-//import 'package:sajilofix/features/report/presentation/pages/report_screen.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_issues_page.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_overview_page.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_profile_page.dart';
 
-class CitizenDashboard extends ConsumerStatefulWidget {
+class AuthorityDashboard extends ConsumerStatefulWidget {
   final int initialIndex;
 
-  const CitizenDashboard({super.key, this.initialIndex = 0});
+  const AuthorityDashboard({super.key, this.initialIndex = 0});
 
   @override
-  ConsumerState<CitizenDashboard> createState() => _CitizenDashboardState();
+  ConsumerState<AuthorityDashboard> createState() => _AuthorityDashboardState();
 }
 
-class _CitizenDashboardState extends ConsumerState<CitizenDashboard> {
+class _AuthorityDashboardState extends ConsumerState<AuthorityDashboard> {
   late int _selectedIndex;
   bool _redirected = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex.clamp(0, 3);
+    _selectedIndex = widget.initialIndex.clamp(0, 2);
   }
 
-  List<Widget> lstBottomScreen = [
-    const HomeScreen(),
-    const ReportStep1(),
-    const MyreportScreen(),
-    const ProfileScreen(),
+  final List<Widget> _tabs = const [
+    AuthorityOverviewScreen(),
+    AuthorityIssuesScreen(),
+    AuthorityProfileScreen(),
   ];
 
   void _handleRoleRedirect(AuthUser? user) {
@@ -57,67 +54,17 @@ class _CitizenDashboardState extends ConsumerState<CitizenDashboard> {
         AppRoutes.adminDashboard,
         (route) => false,
       );
-    } else if (user.roleIndex == 2) {
+      return;
+    }
+
+    if (user.roleIndex != 2) {
       _redirected = true;
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.authorityDashboard,
+        AppRoutes.dashboard,
         (route) => false,
       );
     }
-  }
-
-  Widget _buildDashboard() {
-    return Scaffold(
-      body: lstBottomScreen[_selectedIndex],
-      bottomNavigationBar: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF041027), Color(0xFF3533cd)],
-            ),
-          ),
-
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              currentIndex: _selectedIndex,
-              onTap: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_rounded),
-                  label: "Home",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.camera_alt_rounded),
-                  label: "Report",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.assignment_rounded),
-                  label: "My Reports",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_rounded),
-                  label: "Profile",
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -137,6 +84,49 @@ class _CitizenDashboardState extends ConsumerState<CitizenDashboard> {
         });
         return _buildDashboard();
       },
+    );
+  }
+
+  Widget _buildDashboard() {
+    return Scaffold(
+      body: _tabs[_selectedIndex],
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF041027), Color(0xFF3533CD)],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              currentIndex: _selectedIndex,
+              onTap: (index) => setState(() => _selectedIndex = index),
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.dashboard_rounded),
+                  label: 'Overview',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.assignment_rounded),
+                  label: 'Issues',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

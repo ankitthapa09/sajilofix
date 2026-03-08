@@ -55,6 +55,16 @@ class ReportRepositoryImpl implements ReportRepository {
   }
 
   @override
+  Future<IssueReport> getIssueById(String id) async {
+    final online = await _safeOnlineCheck();
+    if (!online) {
+      throw ApiException.fromError('No internet connection');
+    }
+
+    return _remote.getIssueById(id);
+  }
+
+  @override
   Future<void> deleteIssue(String id) async {
     final online = await _safeOnlineCheck();
     if (!online) {

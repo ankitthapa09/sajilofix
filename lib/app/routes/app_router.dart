@@ -6,6 +6,7 @@ import 'package:sajilofix/features/auth/presentation/pages/forget_password/reset
 import 'package:sajilofix/features/auth/presentation/pages/admin/admin_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/user/user_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_dashboard_page.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_dashboard_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
@@ -63,6 +64,13 @@ class AppRouter {
         final initialIndex = (args is int) ? args : 0;
         return MaterialPageRoute(
           builder: (_) => AdminDashboard(initialIndex: initialIndex),
+        );
+
+      case AppRoutes.authorityDashboard:
+        final args = settings.arguments;
+        final initialIndex = (args is int) ? args : 0;
+        return MaterialPageRoute(
+          builder: (_) => AuthorityDashboard(initialIndex: initialIndex),
         );
 
       default:

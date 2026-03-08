@@ -80,6 +80,10 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
   );
 });
 
+final issueByIdProvider = FutureProvider.family<IssueReport, String>((ref, id) {
+  return ref.read(reportRepositoryProvider).getIssueById(id);
+});
+
 final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
   return SubmitReportUseCase(ref.read(reportRepositoryProvider));
 });

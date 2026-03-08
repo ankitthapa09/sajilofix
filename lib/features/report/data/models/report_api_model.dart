@@ -72,6 +72,7 @@ class IssueReportApiModel {
   final String status;
   final String? statusUpdatedByRole;
   final DateTime? statusUpdatedAt;
+  final List<IssueStatusHistoryEntryApiModel> statusHistory;
   final IssueLocationApiModel location;
   final List<String> photos;
   final DateTime? createdAt;
@@ -86,6 +87,7 @@ class IssueReportApiModel {
     required this.status,
     this.statusUpdatedByRole,
     this.statusUpdatedAt,
+    this.statusHistory = const [],
     required this.location,
     required this.photos,
     this.createdAt,
@@ -113,6 +115,7 @@ class IssueReportApiModel {
             json['status_updated'] ??
             json['updatedAt'],
       ),
+      statusHistory: _parseStatusHistory(json['statusHistory']),
       location: IssueLocationApiModel.fromJson(
         (json['location'] as Map?)?.cast<String, dynamic>() ??
             const <String, dynamic>{},
@@ -135,6 +138,7 @@ class IssueReportApiModel {
       status: status,
       statusUpdatedByRole: statusUpdatedByRole,
       statusUpdatedAt: statusUpdatedAt,
+      statusHistory: statusHistory.map((entry) => entry.toEntity()).toList(),
       location: location.toEntity(),
       photos: photos,
       createdAt: createdAt,
@@ -165,6 +169,52 @@ class IssueReportApiModel {
       if (str.isNotEmpty) return str;
     }
     return null;
+  }
+
+  static List<IssueStatusHistoryEntryApiModel> _parseStatusHistory(
+    Object? raw,
+  ) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map(
+          (e) => IssueStatusHistoryEntryApiModel.fromJson(
+            e.cast<String, dynamic>(),
+          ),
+        )
+        .toList();
+  }
+}
+
+class IssueStatusHistoryEntryApiModel {
+  final String status;
+  final String changedByRole;
+  final String? changedByUserId;
+  final DateTime? changedAt;
+
+  const IssueStatusHistoryEntryApiModel({
+    required this.status,
+    required this.changedByRole,
+    this.changedByUserId,
+    this.changedAt,
+  });
+
+  factory IssueStatusHistoryEntryApiModel.fromJson(Map<String, dynamic> json) {
+    return IssueStatusHistoryEntryApiModel(
+      status: (json['status'] ?? '').toString(),
+      changedByRole: (json['changedByRole'] ?? '').toString(),
+      changedByUserId: json['changedByUserId']?.toString(),
+      changedAt: IssueReportApiModel._tryParseDateTime(json['changedAt']),
+    );
+  }
+
+  IssueStatusHistoryEntry toEntity() {
+    return IssueStatusHistoryEntry(
+      status: status,
+      changedByRole: changedByRole,
+      changedByUserId: changedByUserId,
+      changedAt: changedAt,
+    );
   }
 }
 

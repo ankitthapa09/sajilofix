@@ -5,6 +5,7 @@ abstract interface class ReportRepository {
   Future<List<IssueReport>> listReports();
   Future<List<IssueReport>> listMyReports();
   Future<List<IssueReport>> listAllReports();
+  Future<IssueReport> getIssueById(String id);
   Future<void> deleteIssue(String id);
   Future<String> updateIssueStatus({
     required String id,

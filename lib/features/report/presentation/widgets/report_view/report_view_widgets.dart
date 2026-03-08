@@ -590,6 +590,7 @@ class ReportViewTimeline extends StatelessWidget {
   final String? reporterEmail;
   final String? currentUserEmail;
   final String? statusUpdatedByRole;
+  final List<IssueStatusHistoryEntry> statusHistory;
   final bool isDark;
 
   const ReportViewTimeline({
@@ -599,6 +600,7 @@ class ReportViewTimeline extends StatelessWidget {
     this.reporterEmail,
     this.currentUserEmail,
     this.statusUpdatedByRole,
+    this.statusHistory = const [],
     required this.isDark,
   });
 
@@ -629,11 +631,16 @@ class ReportViewTimeline extends StatelessWidget {
       reporterEmail,
       currentUserEmail,
     );
+    final inProgressEntry = _historyByStatus(statusHistory, 'in_progress');
+    final resolvedEntry = _historyByStatus(
+      statusHistory,
+      isRejected ? 'rejected' : 'resolved',
+    );
     final inProgressBy = activeIndex >= 1
-        ? _byRoleLabel(statusUpdatedByRole)
+        ? _byRoleLabel(inProgressEntry?.changedByRole ?? statusUpdatedByRole)
         : null;
     final resolvedBy = activeIndex >= 2
-        ? _byRoleLabel(statusUpdatedByRole)
+        ? _byRoleLabel(resolvedEntry?.changedByRole ?? statusUpdatedByRole)
         : null;
 
     return Container(
@@ -771,6 +778,16 @@ class ReportViewTimeline extends StatelessWidget {
     final v = (role ?? '').trim().toLowerCase();
     if (v == 'authority') return 'By authority';
     if (v == 'admin') return 'By admin';
+    return null;
+  }
+
+  static IssueStatusHistoryEntry? _historyByStatus(
+    List<IssueStatusHistoryEntry> history,
+    String status,
+  ) {
+    for (final entry in history.reversed) {
+      if (entry.status.trim().toLowerCase() == status) return entry;
+    }
     return null;
   }
 }
@@ -1368,6 +1385,7 @@ class ReportViewStatusUpdater extends StatelessWidget {
   final String currentStatus;
   final bool updating;
   final bool isDark;
+  final bool lockPendingAfterProgress;
   final ValueChanged<String?> onChanged;
 
   const ReportViewStatusUpdater({
@@ -1375,6 +1393,7 @@ class ReportViewStatusUpdater extends StatelessWidget {
     required this.currentStatus,
     required this.updating,
     required this.isDark,
+    this.lockPendingAfterProgress = false,
     required this.onChanged,
   });
 
@@ -1407,6 +1426,12 @@ class ReportViewStatusUpdater extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalized = currentStatus.trim().toLowerCase();
+    final isPending = normalized == 'pending';
+    final isInProgress = normalized == 'in_progress';
+    final isResolved = normalized == 'resolved';
+    final isRejected = normalized == 'rejected';
+    final canSelectPending = !lockPendingAfterProgress || isPending;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -1469,53 +1494,65 @@ class ReportViewStatusUpdater extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: _opts.map((o) {
-              final active = currentStatus == o.v;
+              final isPendingOpt = o.v == 'pending';
+              final isProgressOpt = o.v == 'in_progress';
+              final isResolvedOpt = o.v == 'resolved';
+              final isRejectedOpt = o.v == 'rejected';
+              final active =
+                  currentStatus == o.v || (isResolved && isProgressOpt);
+              final canTap =
+                  !updating &&
+                  (isPendingOpt
+                      ? canSelectPending
+                      : isResolvedOpt
+                      ? (isInProgress || isResolved)
+                      : isProgressOpt
+                      ? (isPending || isInProgress)
+                      : isRejectedOpt
+                      ? (isPending || isInProgress || isRejected)
+                      : true);
+              final iconColor = active
+                  ? o.c
+                  : (isDark ? Colors.white24 : const Color(0xFF9CA3AF));
+              final labelColor = active
+                  ? o.c
+                  : (isDark ? Colors.white30 : const Color(0xFF9CA3AF));
+              final borderColor = active
+                  ? o.c.withValues(alpha: 0.5)
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : const Color(0xFFE9ECF2));
+              final fillColor = active
+                  ? o.c.withValues(alpha: isDark ? 0.2 : 0.1)
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : const Color(0xFFF9FAFB));
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(right: o == _opts.last ? 0 : 8),
                   child: GestureDetector(
-                    onTap: updating ? null : () => onChanged(o.v),
+                    onTap: canTap ? () => onChanged(o.v) : null,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: active
-                            ? o.c.withValues(alpha: isDark ? 0.2 : 0.1)
-                            : (isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : const Color(0xFFF9FAFB)),
+                        color: fillColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: active
-                              ? o.c.withValues(alpha: 0.5)
-                              : (isDark
-                                    ? Colors.white.withValues(alpha: 0.06)
-                                    : const Color(0xFFE9ECF2)),
+                          color: borderColor,
                           width: active ? 1.5 : 1,
                         ),
                       ),
                       child: Column(
                         children: [
-                          Icon(
-                            o.i,
-                            size: 18,
-                            color: active
-                                ? o.c
-                                : (isDark
-                                      ? Colors.white24
-                                      : const Color(0xFF9CA3AF)),
-                          ),
+                          Icon(o.i, size: 18, color: iconColor),
                           const SizedBox(height: 4),
                           Text(
                             o.l,
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
-                              color: active
-                                  ? o.c
-                                  : (isDark
-                                        ? Colors.white30
-                                        : const Color(0xFF9CA3AF)),
+                              color: labelColor,
                             ),
                             textAlign: TextAlign.center,
                           ),

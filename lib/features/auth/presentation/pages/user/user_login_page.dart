@@ -6,6 +6,7 @@ import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/providers/authority_issues_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class UserLoginScreen extends ConsumerStatefulWidget {
@@ -198,6 +199,9 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                             ref.invalidate(currentUserProvider);
                             ref.invalidate(myReportsProvider);
                             ref.invalidate(citizenHomeStatsProvider);
+                            if (roleIndex == 2) {
+                              ref.invalidate(authorityIssuesControllerProvider);
+                            }
 
                             if (!context.mounted) return;
                             showMySnackBar(
@@ -207,10 +211,10 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                                   : 'Login Successful (Citizen)!',
                             );
 
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.dashboard,
-                            );
+                            final target = roleIndex == 2
+                                ? AppRoutes.authorityDashboard
+                                : AppRoutes.dashboard;
+                            Navigator.pushReplacementNamed(context, target);
                           } catch (e) {
                             if (!context.mounted) return;
                             showMySnackBar(

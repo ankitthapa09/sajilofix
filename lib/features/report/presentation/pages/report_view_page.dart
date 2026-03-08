@@ -31,6 +31,7 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
   late String _status;
   String? _statusUpdatedByRole;
   DateTime? _statusUpdatedAt;
+  List<IssueStatusHistoryEntry> _statusHistory = const [];
   bool _updating = false;
   int _photoIndex = 0;
 
@@ -44,6 +45,7 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
     _status = widget.report.status;
     _statusUpdatedByRole = widget.report.statusUpdatedByRole;
     _statusUpdatedAt = widget.report.statusUpdatedAt;
+    _statusHistory = widget.report.statusHistory;
     _enterCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -175,7 +177,21 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final report = widget.report;
-    final currentUserEmail = ref.watch(currentUserProvider).valueOrNull?.email;
+    final currentUser = ref.watch(currentUserProvider).valueOrNull;
+    final currentUserEmail = currentUser?.email;
+    final isCitizen = currentUser?.roleIndex == 0;
+    final roleIndex = currentUser?.roleIndex;
+    final detailsAsync = isCitizen
+        ? ref.watch(issueByIdProvider(report.id))
+        : null;
+    final detailHistory = detailsAsync?.valueOrNull?.statusHistory ?? const [];
+    if (isCitizen && _statusHistory.isEmpty && detailHistory.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _statusHistory.isEmpty) {
+          setState(() => _statusHistory = detailHistory);
+        }
+      });
+    }
     final photos = report.photos
         .map((p) => _buildPhotoUrl(ApiEndpoints.baseUrl, p))
         .whereType<String>()
@@ -314,6 +330,7 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
                         currentStatus: _status,
                         updating: _updating,
                         isDark: isDark,
+                        lockPendingAfterProgress: roleIndex == 2,
                         onChanged: (v) async {
                           if (v == null || v == _status) return;
                           setState(() => _updating = true);
@@ -322,10 +339,6 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
                                 .read(adminIssuesControllerProvider.notifier)
                                 .updateIssueStatus(id: report.id, status: v);
                             if (!mounted) return;
-                            final roleIndex = ref
-                                .read(currentUserProvider)
-                                .valueOrNull
-                                ?.roleIndex;
                             setState(() {
                               _status = v;
                               _statusUpdatedByRole = _roleLabelForIndex(
@@ -333,6 +346,12 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
                                 fallback: _statusUpdatedByRole,
                               );
                               _statusUpdatedAt = DateTime.now();
+                              _statusHistory = _appendStatusHistory(
+                                _statusHistory,
+                                status: v,
+                                changedByRole: _statusUpdatedByRole,
+                                changedAt: _statusUpdatedAt,
+                              );
                             });
                           } finally {
                             if (mounted) setState(() => _updating = false);
@@ -341,19 +360,21 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
                       ),
                     ),
                   ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: ReportViewTimeline(
-                      status: _status,
-                      reporterName: report.reporter?.fullName,
-                      reporterEmail: report.reporter?.email,
-                      currentUserEmail: currentUserEmail,
-                      statusUpdatedByRole: _statusUpdatedByRole,
-                      isDark: isDark,
+                if (isCitizen)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      child: ReportViewTimeline(
+                        status: _status,
+                        reporterName: report.reporter?.fullName,
+                        reporterEmail: report.reporter?.email,
+                        currentUserEmail: currentUserEmail,
+                        statusUpdatedByRole: _statusUpdatedByRole,
+                        statusHistory: _statusHistory,
+                        isDark: isDark,
+                      ),
                     ),
                   ),
-                ),
                 if (report.reporter != null &&
                     report.reporter!.fullName.trim().isNotEmpty)
                   SliverToBoxAdapter(
@@ -399,6 +420,25 @@ class _ReportViewPageState extends ConsumerState<ReportViewPage>
     if (roleIndex == 1) return 'admin';
     if (roleIndex == 2) return 'authority';
     return fallback;
+  }
+
+  static List<IssueStatusHistoryEntry> _appendStatusHistory(
+    List<IssueStatusHistoryEntry> current, {
+    required String status,
+    required String? changedByRole,
+    required DateTime? changedAt,
+  }) {
+    final role = (changedByRole ?? '').trim();
+    if (role.isEmpty) return current;
+    final next = List<IssueStatusHistoryEntry>.from(current);
+    next.add(
+      IssueStatusHistoryEntry(
+        status: status,
+        changedByRole: role,
+        changedAt: changedAt,
+      ),
+    );
+    return next;
   }
 }
 
