@@ -522,21 +522,46 @@ class _IssueCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              OutlinedButton.icon(
-                onPressed: onView,
-                icon: const Icon(Icons.visibility_outlined, size: 18),
-                label: const Text('View'),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: onView,
+                      icon: const Icon(Icons.visibility_outlined, size: 16),
+                      label: const Text('View'),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        minimumSize: const Size(0, 34),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    _StatusMenu(value: issue.status, onChanged: onStatusChange),
+                  ],
+                ),
               ),
-              const SizedBox(width: 12),
-              _StatusMenu(value: issue.status, onChanged: onStatusChange),
-              const Spacer(),
+              const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: const Icon(Icons.delete_outline, size: 16),
                 label: const Text('Delete'),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  minimumSize: const Size(0, 34),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ],
@@ -627,7 +652,7 @@ class _StatusMenu extends StatelessWidget {
           )
           .toList(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
@@ -637,8 +662,8 @@ class _StatusMenu extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.edit_outlined, size: 16),
-            const SizedBox(width: 6),
+            const Icon(Icons.edit_outlined, size: 15),
+            const SizedBox(width: 5),
             Text(
               _statusLabel(value),
               style: Theme.of(context).textTheme.labelSmall,

@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
@@ -18,6 +23,114 @@ class ReportStep6 extends ConsumerStatefulWidget {
 
 class _ReportStep6State extends ConsumerState<ReportStep6> {
   bool _isSubmitting = false;
+  StreamSubscription<UserAccelerometerEvent>? _shakeSubscription;
+  DateTime? _lastShakeAt;
+  bool _isShakeDialogOpen = false;
+
+  static const double _shakeThreshold = 16.0;
+  static const Duration _shakeCooldown = Duration(milliseconds: 1200);
+
+  @override
+  void initState() {
+    super.initState();
+    _startShakeListener();
+  }
+
+  @override
+  void dispose() {
+    final subscription = _shakeSubscription;
+    _shakeSubscription = null;
+    if (subscription != null) {
+      unawaited(
+        subscription.cancel().catchError((error) {
+          // Some builds/hot restarts can leave sensors channel unregistered.
+          if (error is MissingPluginException) return;
+        }),
+      );
+    }
+    super.dispose();
+  }
+
+  void _startShakeListener() {
+    try {
+      _shakeSubscription = userAccelerometerEventStream().listen(
+        (event) {
+          if (!mounted || _isSubmitting || _isShakeDialogOpen) return;
+
+          final magnitude = math.sqrt(
+            event.x * event.x + event.y * event.y + event.z * event.z,
+          );
+
+          if (magnitude < _shakeThreshold) return;
+
+          final now = DateTime.now();
+          if (_lastShakeAt != null &&
+              now.difference(_lastShakeAt!) < _shakeCooldown) {
+            return;
+          }
+          _lastShakeAt = now;
+          _onShakeDetected();
+        },
+        onError: (error, _) {
+          if (error is MissingPluginException) {
+            _shakeSubscription = null;
+          }
+        },
+      );
+    } on MissingPluginException {
+      _shakeSubscription = null;
+    }
+  }
+
+  Future<void> _onShakeDetected() async {
+    final draft = ref.read(reportFormDraftProvider);
+    final hasDraftData =
+        (draft.category ?? '').trim().isNotEmpty ||
+        (draft.locationTitle ?? '').trim().isNotEmpty ||
+        (draft.issueTitle ?? '').trim().isNotEmpty ||
+        (draft.issueDescription ?? '').trim().isNotEmpty ||
+        draft.photos.isNotEmpty;
+
+    if (!hasDraftData) return;
+
+    _isShakeDialogOpen = true;
+    final shouldDiscard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Discard report draft?'),
+          content: const Text(
+            'We detected a shake gesture. Do you want to clear this report draft and return to dashboard?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Keep Draft'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Discard'),
+            ),
+          ],
+        );
+      },
+    );
+    _isShakeDialogOpen = false;
+
+    if (shouldDiscard != true || !mounted) return;
+
+    ref.read(reportFormDraftProvider.notifier).reset();
+    showMySnackBar(
+      context: context,
+      message: 'Draft discarded.',
+      icon: Icons.undo,
+    );
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.dashboard,
+      (route) => false,
+      arguments: 0,
+    );
+  }
 
   void _popToNamedOrCount(String routeName, int countFallback) {
     final navigator = Navigator.of(context);
@@ -364,6 +477,8 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
                   const SizedBox(height: 16),
 
                   _GuidelinesNotice(),
+                  const SizedBox(height: 10),
+                  const _ShakeHint(),
                 ],
               ),
             ),
@@ -526,6 +641,40 @@ class _GuidelinesNotice extends StatelessWidget {
               'By submitting this report, you confirm that the information provided is accurate and you agree to our community guidelines.',
               style: TextStyle(
                 color: Color(0xFF1B4332),
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShakeHint extends StatelessWidget {
+  const _ShakeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF4FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC9D8FF)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.screen_rotation_alt_outlined, color: Color(0xFF3A6ACA)),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Tip: Shake your phone on this page to quickly discard your draft (confirmation required).',
+              style: TextStyle(
+                color: Color(0xFF2E4C95),
                 fontWeight: FontWeight.w600,
                 height: 1.35,
               ),
