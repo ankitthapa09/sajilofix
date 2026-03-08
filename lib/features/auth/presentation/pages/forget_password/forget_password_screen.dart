@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
@@ -39,7 +40,7 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
                       ),
                     ),
                   ),
-                  Image.asset("assets/images/sajilofix_logo.png", height: 120),
+                  const AppLogoImage(height: 120),
                 ],
               ),
               const SizedBox(height: 20),

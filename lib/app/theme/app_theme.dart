@@ -148,3 +148,57 @@ ThemeData getSalijoFixAppTheme() {
     ),
   );
 }
+
+ThemeData getSalijoFixDarkTheme() {
+  const brandBlue = Color(0xFF5B7BFF);
+  const brandIndigo = Color(0xFF7A7FFF);
+  const cardDark = Color(0xFF151A23);
+  const bgDark = Color(0xFF0F1117);
+
+  final scheme = ColorScheme.fromSeed(
+    seedColor: brandIndigo,
+    brightness: Brightness.dark,
+  ).copyWith(primary: brandIndigo, secondary: brandBlue);
+
+  return ThemeData(
+    colorScheme: scheme,
+    brightness: Brightness.dark,
+    fontFamily: 'Poppins',
+    useMaterial3: true,
+    scaffoldBackgroundColor: bgDark,
+    cardColor: cardDark,
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: brandIndigo,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: bgDark,
+      elevation: 0,
+      centerTitle: true,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontFamily: 'Poppins',
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1A1F2B),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.3)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: scheme.primary, width: 1.8),
+      ),
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.55)),
+      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.85)),
+    ),
+  );
+}

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
+import 'package:sajilofix/app/theme/theme_mode_controller.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
+import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
 import 'package:sajilofix/core/services/storage/app_preferences.dart';
@@ -21,6 +23,7 @@ class AuthorityProfileScreen extends ConsumerStatefulWidget {
 class _AuthorityProfileScreenState
     extends ConsumerState<AuthorityProfileScreen> {
   bool _biometricLock = false;
+  bool _autoDarkMode = false;
 
   @override
   void initState() {
@@ -30,8 +33,12 @@ class _AuthorityProfileScreenState
 
   Future<void> _loadSecurityPreferences() async {
     final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 2);
+    final autoDark = await AppPreferences.isAutoDarkModeEnabled();
     if (!mounted) return;
-    setState(() => _biometricLock = enabled);
+    setState(() {
+      _biometricLock = enabled;
+      _autoDarkMode = autoDark;
+    });
   }
 
   Future<void> _toggleBiometric(bool enabled) async {
@@ -39,6 +46,7 @@ class _AuthorityProfileScreenState
       final ok = await BiometricService().authenticate(
         reason: 'Confirm to enable biometric login',
       );
+      if (!mounted) return;
       if (!ok) {
         showMySnackBar(
           context: context,
@@ -51,6 +59,11 @@ class _AuthorityProfileScreenState
 
     setState(() => _biometricLock = enabled);
     await AppPreferences.setBiometricEnabled(roleIndex: 2, enabled: enabled);
+  }
+
+  Future<void> _toggleAutoDarkMode(bool enabled) async {
+    setState(() => _autoDarkMode = enabled);
+    await ref.read(appThemeModeProvider.notifier).setAutoDarkMode(enabled);
   }
 
   @override
@@ -92,6 +105,7 @@ class _AuthorityProfileScreenState
                 data: (user) => _ProfileHeader(
                   name: user?.fullName ?? 'Authority',
                   email: user?.email ?? 'authority@sajilofix.gov.np',
+                  photoUrl: _buildProfilePhotoUrl(user?.profilePhoto),
                 ),
                 orElse: () => const _ProfileHeader(
                   name: 'Authority',
@@ -124,6 +138,10 @@ class _AuthorityProfileScreenState
                     biometricLock: _biometricLock,
                     onBiometricChanged: _toggleBiometric,
                   ),
+                  AutoDarkModeSection(
+                    autoDarkMode: _autoDarkMode,
+                    onAutoDarkModeChanged: _toggleAutoDarkMode,
+                  ),
                   const SizedBox(height: 8),
                   _ProfileActionTile(
                     icon: Icons.logout,
@@ -152,13 +170,27 @@ class _AuthorityProfileScreenState
       ),
     );
   }
+
+  String? _buildProfilePhotoUrl(String? profilePhoto) {
+    final rel = (profilePhoto ?? '').trim();
+    if (rel.isEmpty) return null;
+    final base = ApiEndpoints.baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final clean = rel.replaceAll(RegExp(r'^/+'), '');
+    if (clean.startsWith('uploads/')) return '$base/$clean';
+    return '$base/uploads/$clean';
+  }
 }
 
 class _ProfileHeader extends StatelessWidget {
   final String name;
   final String email;
+  final String? photoUrl;
 
-  const _ProfileHeader({required this.name, required this.email});
+  const _ProfileHeader({
+    required this.name,
+    required this.email,
+    this.photoUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +222,18 @@ class _ProfileHeader extends StatelessWidget {
           CircleAvatar(
             radius: 26,
             backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.18),
-            child: Icon(Icons.person_rounded, color: onSurface),
+            backgroundImage: (photoUrl ?? '').trim().isNotEmpty
+                ? NetworkImage(photoUrl!)
+                : null,
+            child: (photoUrl ?? '').trim().isNotEmpty
+                ? null
+                : Text(
+                    _initials(name),
+                    style: TextStyle(
+                      color: onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -218,6 +261,21 @@ class _ProfileHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static String _initials(String fullName) {
+    final parts = fullName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return 'A';
+    if (parts.length == 1) {
+      return parts.first.characters.take(2).toString().toUpperCase();
+    }
+    return (parts.first.characters.first.toString() +
+            parts.last.characters.first.toString())
+        .toUpperCase();
   }
 }
 

@@ -162,6 +162,17 @@ class _AuthorityIssuesScreenState extends ConsumerState<AuthorityIssuesScreen> {
                         child: _IssuesMap(
                           center: mapData.center,
                           markers: mapData.markers,
+                          onOpenFullMap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => _FullScreenIssuesMapPage(
+                                  center: mapData.center,
+                                  markers: mapData.markers,
+                                  title: 'Authority Issues Map',
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -350,6 +361,10 @@ class _IssueCard extends StatelessWidget {
     final avatarBg = theme.brightness == Brightness.dark
         ? Colors.white.withValues(alpha: 0.12)
         : const Color(0xFFEEF2FF);
+    final photoUrl = _buildIssuePhotoUrl(
+      ApiEndpoints.baseUrl,
+      issue.photos.isNotEmpty ? issue.photos.first : null,
+    );
 
     return _GlassCard(
       child: Column(
@@ -357,6 +372,12 @@ class _IssueCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              _IssueThumbnail(
+                photoUrl: photoUrl,
+                isDark: theme.brightness == Brightness.dark,
+                color: const Color(0xFF38E7FF),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   issue.title,
@@ -473,6 +494,15 @@ class _IssueCard extends StatelessWidget {
         ? '$base/$clean'
         : '$base/uploads/$clean';
   }
+
+  static String? _buildIssuePhotoUrl(String baseUrl, String? path) {
+    final rel = (path ?? '').trim();
+    if (rel.isEmpty) return null;
+    final cleanBase = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final clean = rel.replaceAll(RegExp(r'^/+'), '');
+    if (clean.startsWith('uploads/')) return '$cleanBase/$clean';
+    return '$cleanBase/uploads/$clean';
+  }
 }
 
 class _StatusChip extends StatelessWidget {
@@ -502,34 +532,152 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
+class _IssueThumbnail extends StatelessWidget {
+  final String? photoUrl;
+  final bool isDark;
+  final Color color;
+
+  const _IssueThumbnail({
+    required this.photoUrl,
+    required this.isDark,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final url = (photoUrl ?? '').trim();
+    if (url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          url,
+          width: 46,
+          height: 46,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallback(),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _fallback(showLoader: true);
+          },
+        ),
+      );
+    }
+    return _fallback();
+  }
+
+  Widget _fallback({bool showLoader = false}) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: isDark
+            ? color.withValues(alpha: 0.16)
+            : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: showLoader
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            )
+          : Icon(Icons.photo_outlined, color: color),
+    );
+  }
+}
+
 class _IssuesMap extends StatelessWidget {
   final LatLng center;
   final List<Marker> markers;
+  final VoidCallback onOpenFullMap;
 
-  const _IssuesMap({required this.center, required this.markers});
+  const _IssuesMap({
+    required this.center,
+    required this.markers,
+    required this.onOpenFullMap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 210,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: 12,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 12,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.sajilofix.app',
+                ),
+                MarkerLayer(markers: markers),
+              ],
             ),
           ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.sajilofix.app',
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Material(
+              color: Colors.white.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: onOpenFullMap,
+                child: const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Icon(Icons.open_in_full_rounded, size: 18),
+                ),
+              ),
             ),
-            MarkerLayer(markers: markers),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FullScreenIssuesMapPage extends StatelessWidget {
+  final LatLng center;
+  final List<Marker> markers;
+  final String title;
+
+  const _FullScreenIssuesMapPage({
+    required this.center,
+    required this.markers,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: FlutterMap(
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 13,
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.all,
+          ),
         ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.sajilofix.app',
+          ),
+          MarkerLayer(markers: markers),
+        ],
       ),
     );
   }

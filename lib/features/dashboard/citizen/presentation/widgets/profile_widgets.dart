@@ -777,16 +777,20 @@ class ProfilePrivacySection extends StatelessWidget {
 class ProfileSecuritySection extends StatelessWidget {
   final bool biometricLock;
   final bool autoLogout;
+  final bool autoDarkMode;
   final ValueChanged<bool> onBiometricChanged;
   final ValueChanged<bool> onAutoLogoutChanged;
+  final ValueChanged<bool> onAutoDarkModeChanged;
   final VoidCallback onChangePassword;
 
   const ProfileSecuritySection({
     super.key,
     required this.biometricLock,
     required this.autoLogout,
+    required this.autoDarkMode,
     required this.onBiometricChanged,
     required this.onAutoLogoutChanged,
+    required this.onAutoDarkModeChanged,
     required this.onChangePassword,
   });
 
@@ -807,6 +811,12 @@ class ProfileSecuritySection extends StatelessWidget {
           onChanged: onBiometricChanged,
           title: 'Biometric login',
           subtitle: 'Unlock with fingerprint or face ID',
+        ),
+        SwitchListTile.adaptive(
+          value: autoDarkMode,
+          onChanged: onAutoDarkModeChanged,
+          title: const Text('Auto dark mode'),
+          subtitle: const Text('Follow device light and dark appearance'),
         ),
         SwitchListTile.adaptive(
           value: autoLogout,
@@ -840,6 +850,94 @@ class BiometricOnlySection extends StatelessWidget {
           onChanged: onBiometricChanged,
           title: 'Biometric login',
           subtitle: 'Unlock with fingerprint or face ID',
+        ),
+      ],
+    );
+  }
+}
+
+class AutoDarkModeSection extends StatelessWidget {
+  final bool autoDarkMode;
+  final ValueChanged<bool> onAutoDarkModeChanged;
+
+  const AutoDarkModeSection({
+    super.key,
+    required this.autoDarkMode,
+    required this.onAutoDarkModeChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB);
+    final gradient = isDark
+        ? const LinearGradient(
+            colors: [Color(0xFF0B1324), Color(0xFF14223D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : const LinearGradient(
+            colors: [Color(0xFFE8F1FF), Color(0xFFF9FBFF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+
+    return ProfileSettingsCard(
+      icon: Icons.dark_mode_outlined,
+      title: 'Appearance',
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent.withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Icon(Icons.dark_mode_outlined, color: accent, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dark mode',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Enable dark theme immediately for the app',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: autoDarkMode,
+                onChanged: onAutoDarkModeChanged,
+              ),
+            ],
+          ),
         ),
       ],
     );

@@ -6,6 +6,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/dropdown_field.dart';
 import 'package:sajilofix/features/auth/presentation/widgets/signup/labeled_field.dart';
@@ -412,12 +413,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 child: AnimatedOpacity(
                                   duration: const Duration(milliseconds: 120),
                                   opacity: logoOpacity,
-                                  child: Hero(
+                                  child: const Hero(
                                     tag: HeroTags.appLogo,
-                                    child: Image.asset(
-                                      'assets/images/sajilofix_logo.png',
-                                      height: 90,
-                                    ),
+                                    child: AppLogoImage(height: 90),
                                   ),
                                 ),
                               ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sajilofix/app/theme/theme_mode_controller.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/api/api_client.dart';
@@ -56,8 +57,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Future<void> _loadSecurityPreferences() async {
     final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 0);
+    final autoDark = await AppPreferences.isAutoDarkModeEnabled();
     if (!mounted) return;
-    setState(() => _biometricLock = enabled);
+    setState(() {
+      _biometricLock = enabled;
+      _autoDarkMode = autoDark;
+    });
   }
 
   Future<void> _toggleBiometric(bool enabled) async {
@@ -65,6 +70,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       final ok = await BiometricService().authenticate(
         reason: 'Confirm to enable biometric login',
       );
+      if (!mounted) return;
       if (!ok) {
         showMySnackBar(
           context: context,
@@ -77,6 +83,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
     setState(() => _biometricLock = enabled);
     await AppPreferences.setBiometricEnabled(roleIndex: 0, enabled: enabled);
+  }
+
+  Future<void> _toggleAutoDarkMode(bool enabled) async {
+    setState(() => _autoDarkMode = enabled);
+    await ref.read(appThemeModeProvider.notifier).setAutoDarkMode(enabled);
   }
 
   @override
@@ -100,6 +111,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   bool _shareUsageData = false;
   bool _locationServices = true;
   bool _biometricLock = false;
+  bool _autoDarkMode = false;
   bool _autoLogout = false;
 
   Future<void> _uploadProfilePhoto({
@@ -280,8 +292,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         .where((p) => p.isNotEmpty)
         .toList();
     if (parts.isEmpty) return 'U';
-    if (parts.length == 1)
+    if (parts.length == 1) {
       return parts.first.characters.take(2).toString().toUpperCase();
+    }
     return (parts.first.characters.first.toString() +
             parts.last.characters.first.toString())
         .toUpperCase();
@@ -402,8 +415,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         return ProfileSecuritySection(
           key: const ValueKey(3),
           biometricLock: _biometricLock,
+          autoDarkMode: _autoDarkMode,
           autoLogout: _autoLogout,
           onBiometricChanged: _toggleBiometric,
+          onAutoDarkModeChanged: _toggleAutoDarkMode,
           onAutoLogoutChanged: (v) => setState(() => _autoLogout = v),
           onChangePassword: () => showMySnackBar(
             context: context,

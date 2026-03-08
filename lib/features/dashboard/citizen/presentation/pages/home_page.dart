@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/home_widgets.dart';
@@ -43,10 +44,7 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Hero(
                       tag: HeroTags.appLogo,
-                      child: Image.asset(
-                        'assets/images/sajilofix_logo.png',
-                        height: 100,
-                      ),
+                      child: const AppLogoImage(height: 100),
                     ),
                     const Spacer(),
                     // Notification bell
