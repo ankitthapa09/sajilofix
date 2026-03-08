@@ -253,6 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentUserAsync = ref.watch(currentUserProvider);
+    final profileState = ref.watch(citizenProfileControllerProvider);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -281,6 +282,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     photoUrl: _profileImageBytes == null
                         ? _buildProfilePhotoUrl(apiBaseUrl, user.profilePhoto)
                         : null,
+                    status: profileState.status,
                     onPickPhoto: _pickProfilePhoto,
                     onEditProfile: () => _openProfileEdit(user),
                   ),

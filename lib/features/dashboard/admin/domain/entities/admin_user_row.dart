@@ -4,6 +4,13 @@ class AdminUserRow {
   final String email;
   final String role;
   final String? profilePhoto;
+  final String? phone;
+  final String? wardNumber;
+  final String? municipality;
+  final String? district;
+  final String? tole;
+  final String? dob;
+  final String? citizenshipNumber;
   final String? department;
   final String status;
   final String? joinedDate;
@@ -17,6 +24,13 @@ class AdminUserRow {
     required this.role,
     required this.status,
     this.profilePhoto,
+    this.phone,
+    this.wardNumber,
+    this.municipality,
+    this.district,
+    this.tole,
+    this.dob,
+    this.citizenshipNumber,
     this.department,
     this.joinedDate,
     this.lastActive,
@@ -30,6 +44,13 @@ class AdminUserRow {
       email: (json['email'] ?? '').toString(),
       role: (json['role'] ?? '').toString(),
       profilePhoto: json['profilePhoto']?.toString(),
+      phone: json['phone']?.toString(),
+      wardNumber: (json['wardNumber'] ?? json['ward'])?.toString(),
+      municipality: json['municipality']?.toString(),
+      district: json['district']?.toString(),
+      tole: json['tole']?.toString(),
+      dob: json['dob']?.toString(),
+      citizenshipNumber: json['citizenshipNumber']?.toString(),
       department: json['department']?.toString(),
       status: (json['status'] ?? 'active').toString(),
       joinedDate: json['joinedDate']?.toString(),

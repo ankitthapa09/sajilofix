@@ -7,6 +7,39 @@ final adminUsersRemoteDatasourceProvider = Provider<AdminUsersRemoteDatasource>(
   (ref) => AdminUsersRemoteDatasource(apiClient: ref.read(apiClientProvider)),
 );
 
+class AdminUserMetrics {
+  final int totalUsers;
+  final int authorityCount;
+  final int citizenCount;
+
+  const AdminUserMetrics({
+    required this.totalUsers,
+    required this.authorityCount,
+    required this.citizenCount,
+  });
+}
+
+final adminUserMetricsProvider = FutureProvider<AdminUserMetrics>((ref) async {
+  final remote = ref.read(adminUsersRemoteDatasourceProvider);
+  final totalPage = await remote.listUsers(page: 1, limit: 1);
+  final authorityPage = await remote.listUsers(
+    page: 1,
+    limit: 1,
+    role: 'authority',
+  );
+  final citizenPage = await remote.listUsers(
+    page: 1,
+    limit: 1,
+    role: 'citizen',
+  );
+
+  return AdminUserMetrics(
+    totalUsers: totalPage.total,
+    authorityCount: authorityPage.total,
+    citizenCount: citizenPage.total,
+  );
+});
+
 class AdminUsersState {
   final List<AdminUserRow> users;
   final bool isLoading;
@@ -261,6 +294,19 @@ class AdminUsersController extends StateNotifier<AdminUsersState> {
       await _remote.deleteCitizen(id);
     }
     await refresh();
+  }
+
+  Future<AdminUserRow?> fetchUserDetail({
+    required String id,
+    required String role,
+  }) async {
+    if (role == 'authority') {
+      return _remote.fetchAuthorityById(id);
+    }
+    if (role == 'citizen') {
+      return _remote.fetchCitizenById(id);
+    }
+    return null;
   }
 }
 

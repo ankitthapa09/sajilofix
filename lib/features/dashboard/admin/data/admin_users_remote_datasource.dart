@@ -238,6 +238,36 @@ class AdminUsersRemoteDatasource {
     }
   }
 
+  Future<AdminUserRow> fetchAuthorityById(String id) async {
+    try {
+      final response = await _apiClient.get(
+        '${ApiEndpoints.adminAuthorityById}$id',
+      );
+      final data = _asJsonMap(response.data);
+      final userMap = _asJsonMap(data['data']);
+      return AdminUserRow.fromJson(userMap);
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
+  Future<AdminUserRow> fetchCitizenById(String id) async {
+    try {
+      final response = await _apiClient.get(
+        '${ApiEndpoints.adminCitizenById}$id',
+      );
+      final data = _asJsonMap(response.data);
+      final userMap = _asJsonMap(data['data']);
+      return AdminUserRow.fromJson(userMap);
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
   Map<String, dynamic> _stripNulls(Map<String, dynamic> input) {
     final data = Map<String, dynamic>.from(input);
     data.removeWhere((_, value) => value == null);

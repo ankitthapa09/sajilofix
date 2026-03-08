@@ -87,3 +87,62 @@ final submitReportUseCaseProvider = Provider<SubmitReportUseCase>((ref) {
 final myReportsProvider = FutureProvider<List<IssueReport>>((ref) async {
   return ref.read(reportRepositoryProvider).listReports();
 });
+
+final adminIssuesControllerProvider =
+    StateNotifierProvider<AdminIssuesController, AsyncValue<List<IssueReport>>>(
+      (ref) => AdminIssuesController(ref.read(reportRepositoryProvider)),
+    );
+
+class AdminIssuesController
+    extends StateNotifier<AsyncValue<List<IssueReport>>> {
+  final ReportRepository _repository;
+
+  AdminIssuesController(this._repository) : super(const AsyncValue.loading()) {
+    load();
+  }
+
+  Future<void> load() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(_repository.listReports);
+  }
+
+  Future<void> refresh() async {
+    await load();
+  }
+
+  Future<void> deleteIssue(String id) async {
+    await _repository.deleteIssue(id);
+    final current = state.valueOrNull ?? const <IssueReport>[];
+    state = AsyncValue.data(current.where((issue) => issue.id != id).toList());
+  }
+
+  Future<void> updateIssueStatus({
+    required String id,
+    required String status,
+  }) async {
+    final updatedStatus = await _repository.updateIssueStatus(
+      id: id,
+      status: status,
+    );
+    final current = state.valueOrNull ?? const <IssueReport>[];
+    state = AsyncValue.data(
+      current
+          .map(
+            (issue) => issue.id == id
+                ? IssueReport(
+                    id: issue.id,
+                    category: issue.category,
+                    title: issue.title,
+                    description: issue.description,
+                    urgency: issue.urgency,
+                    status: updatedStatus,
+                    location: issue.location,
+                    photos: issue.photos,
+                    createdAt: issue.createdAt,
+                  )
+                : issue,
+          )
+          .toList(),
+    );
+  }
+}

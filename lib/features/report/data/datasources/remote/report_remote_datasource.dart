@@ -63,6 +63,39 @@ class ReportRemoteDatasource {
     }
   }
 
+  Future<String> updateIssueStatus({
+    required String id,
+    required String status,
+  }) async {
+    try {
+      final response = await _apiClient.patch(
+        '${ApiEndpoints.issueById}$id/status',
+        data: <String, dynamic>{'status': status},
+      );
+      final data = _asJsonMap(response.data);
+      final payload = data['data'];
+      if (payload is Map) {
+        final parsed = Map<String, dynamic>.from(payload);
+        return (parsed['status'] ?? status).toString();
+      }
+      return status;
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
+  Future<void> deleteIssue(String id) async {
+    try {
+      await _apiClient.delete('${ApiEndpoints.issueById}$id');
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
   Future<FormData> _buildCreateFormData(CreateIssueReportInput input) async {
     final locationJson = jsonEncode(<String, dynamic>{
       'address': input.location.address,

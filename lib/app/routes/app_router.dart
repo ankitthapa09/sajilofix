@@ -59,7 +59,11 @@ class AppRouter {
         );
 
       case AppRoutes.adminDashboard:
-        return MaterialPageRoute(builder: (_) => const AdminDashboard());
+        final args = settings.arguments;
+        final initialIndex = (args is int) ? args : 0;
+        return MaterialPageRoute(
+          builder: (_) => AdminDashboard(initialIndex: initialIndex),
+        );
 
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());

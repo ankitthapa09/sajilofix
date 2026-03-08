@@ -6,19 +6,30 @@ import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/api/api_exception.dart';
 import 'package:sajilofix/features/auth/data/models/auth_api_model.dart';
 
+class CitizenProfilePayload {
+  final AuthApiModel user;
+  final String? status;
+
+  const CitizenProfilePayload({required this.user, this.status});
+}
+
 class CitizenProfileRemoteDatasource {
   final ApiClient _apiClient;
 
   CitizenProfileRemoteDatasource({required ApiClient apiClient})
     : _apiClient = apiClient;
 
-  Future<AuthApiModel?> fetchMe() async {
+  Future<CitizenProfilePayload?> fetchMe() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.getMe);
       final data = _asJsonMap(response.data);
       final userMap = _extractUserMap(data);
       if (userMap == null) return null;
-      return AuthApiModel.fromJSON(userMap);
+      final status = userMap['status']?.toString();
+      return CitizenProfilePayload(
+        user: AuthApiModel.fromJSON(userMap),
+        status: status,
+      );
     } on DioException catch (e) {
       throw _toApiException(e);
     } catch (e) {
