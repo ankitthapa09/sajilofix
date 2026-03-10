@@ -4,8 +4,14 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
+import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
+import 'package:sajilofix/core/services/storage/biometric_credentials_service.dart';
+import 'package:sajilofix/core/services/storage/app_preferences.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/providers/authority_issues_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class UserLoginScreen extends ConsumerStatefulWidget {
@@ -17,6 +23,7 @@ class UserLoginScreen extends ConsumerStatefulWidget {
 
 class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
   bool showPassword = false;
+  bool _isBiometricEnabledForRole = false;
 
   final TextEditingController _loginEmailController = TextEditingController();
   final TextEditingController _loginPassController = TextEditingController();
@@ -49,10 +56,187 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loginEmailController.addListener(_onEmailChanged);
+    _refreshBiometricCardState();
+  }
+
+  void _onEmailChanged() {
+    _refreshBiometricCardState();
+  }
+
+  Future<void> _refreshBiometricCardState() async {
+    final typedEmail = _loginEmailController.text.trim();
+    var roleIndex = _roleIndexForEmail(typedEmail);
+
+    if (typedEmail.isEmpty) {
+      final saved = await BiometricCredentialsService.read();
+      if (saved != null) {
+        roleIndex = saved.roleIndex;
+      }
+    }
+
+    final enabled = await AppPreferences.isBiometricEnabled(
+      roleIndex: roleIndex,
+    );
+
+    if (!mounted || enabled == _isBiometricEnabledForRole) return;
+    setState(() => _isBiometricEnabledForRole = enabled);
+  }
+
+  @override
   void dispose() {
+    _loginEmailController.removeListener(_onEmailChanged);
     _loginEmailController.dispose();
     _loginPassController.dispose();
     super.dispose();
+  }
+
+  Future<bool> _verifyBiometricForCard(int roleIndex) async {
+    final enabled = await AppPreferences.isBiometricEnabled(
+      roleIndex: roleIndex,
+    );
+    if (!enabled) {
+      showMySnackBar(
+        context: context,
+        message: 'Turn on biometric login in Security settings first.',
+        isError: true,
+      );
+      return false;
+    }
+
+    final service = BiometricService();
+    final available = await service.isAvailable();
+    if (!available) {
+      showMySnackBar(
+        context: context,
+        message: 'Biometric is not available on this device.',
+        isError: true,
+      );
+      return false;
+    }
+
+    final ok = await service.authenticate(
+      reason: 'Use Face ID / Touch ID to sign in',
+    );
+    if (!ok) {
+      showMySnackBar(
+        context: context,
+        message: 'Biometric authentication failed.',
+        isError: true,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<BiometricCredentials?> _resolveBiometricCredentials() async {
+    final typedEmail = _loginEmailController.text.trim();
+    final typedPassword = _loginPassController.text;
+
+    if (typedEmail.isNotEmpty && typedPassword.isNotEmpty) {
+      return BiometricCredentials(
+        email: typedEmail,
+        password: typedPassword,
+        roleIndex: _roleIndexForEmail(typedEmail),
+      );
+    }
+
+    final saved = await BiometricCredentialsService.read();
+    if (saved == null) {
+      showMySnackBar(
+        context: context,
+        message:
+            'No saved biometric credentials found. Login once with email and password first.',
+        isError: true,
+      );
+      return null;
+    }
+
+    return saved;
+  }
+
+  Future<void> _completeLoginSuccess(int roleIndex) async {
+    ref.invalidate(currentUserProvider);
+    ref.invalidate(myReportsProvider);
+    ref.invalidate(citizenHomeStatsProvider);
+    ref.invalidate(unreadCountProvider);
+    ref.invalidate(notificationsControllerProvider);
+    if (roleIndex == 2) {
+      ref.invalidate(authorityIssuesControllerProvider);
+    }
+
+    if (!context.mounted) return;
+    showMySnackBar(
+      context: context,
+      message: roleIndex == 2
+          ? 'Login Successful (Authority)!'
+          : 'Login Successful (Citizen)!',
+    );
+
+    final target = roleIndex == 2
+        ? AppRoutes.authorityDashboard
+        : AppRoutes.dashboard;
+    Navigator.pushReplacementNamed(context, target);
+  }
+
+  Future<void> _performLogin({required bool fromBiometricCard}) async {
+    if (fromBiometricCard) {
+      final creds = await _resolveBiometricCredentials();
+      if (creds == null) return;
+
+      final roleIndex = creds.roleIndex;
+      final biometricOk = await _verifyBiometricForCard(roleIndex);
+      if (!biometricOk) return;
+
+      try {
+        await ref
+            .read(loginUseCaseProvider)
+            .call(
+              email: creds.email,
+              password: creds.password,
+              roleIndex: roleIndex,
+            );
+
+        _loginEmailController.text = creds.email;
+        await _completeLoginSuccess(roleIndex);
+      } catch (e) {
+        if (!context.mounted) return;
+        showMySnackBar(context: context, message: e.toString());
+      }
+      return;
+    }
+
+    final isValid = _formkey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    final email = _loginEmailController.text;
+    final password = _loginPassController.text;
+    final roleIndex = _roleIndexForEmail(email);
+
+    try {
+      await ref
+          .read(loginUseCaseProvider)
+          .call(email: email, password: password, roleIndex: roleIndex);
+
+      final enabled = await AppPreferences.isBiometricEnabled(
+        roleIndex: roleIndex,
+      );
+      if (enabled) {
+        await BiometricCredentialsService.save(
+          email: email,
+          password: password,
+          roleIndex: roleIndex,
+        );
+      }
+
+      await _completeLoginSuccess(roleIndex);
+    } catch (e) {
+      if (!context.mounted) return;
+      showMySnackBar(context: context, message: e.toString());
+    }
   }
 
   @override
@@ -73,10 +257,7 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                 const SizedBox(height: 10),
                 Hero(
                   tag: HeroTags.appLogo,
-                  child: Image.asset(
-                    'assets/images/sajilofix_logo.png',
-                    height: 120,
-                  ),
+                  child: const AppLogoImage(height: 120),
                 ),
                 const SizedBox(height: 18),
 
@@ -178,47 +359,8 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                         text: 'Login',
                         height: 54,
                         borderRadius: 18,
-                        onPressed: () async {
-                          final isValid =
-                              _formkey.currentState?.validate() ?? false;
-                          if (!isValid) return;
-
-                          final email = _loginEmailController.text;
-                          final roleIndex = _roleIndexForEmail(email);
-
-                          try {
-                            await ref
-                                .read(loginUseCaseProvider)
-                                .call(
-                                  email: email,
-                                  password: _loginPassController.text,
-                                  roleIndex: roleIndex,
-                                );
-
-                            ref.invalidate(currentUserProvider);
-                            ref.invalidate(myReportsProvider);
-                            ref.invalidate(citizenHomeStatsProvider);
-
-                            if (!context.mounted) return;
-                            showMySnackBar(
-                              context: context,
-                              message: roleIndex == 2
-                                  ? 'Login Successful (Authority)!'
-                                  : 'Login Successful (Citizen)!',
-                            );
-
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.dashboard,
-                            );
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            showMySnackBar(
-                              context: context,
-                              message: e.toString(),
-                            );
-                          }
-                        },
+                        onPressed: () =>
+                            _performLogin(fromBiometricCard: false),
                       ),
 
                       const SizedBox(height: 6),
@@ -286,13 +428,20 @@ class _UserLoginScreenState extends ConsumerState<UserLoginScreen> {
                       _SocialButton(
                         label: 'Use Face ID / Touch ID',
                         leading: const Icon(Icons.fingerprint, size: 20),
-                        onPressed: () {
-                          showMySnackBar(
-                            context: context,
-                            message: 'Biometric sign-in coming soon',
-                          );
-                        },
+                        enabled: _isBiometricEnabledForRole,
+                        onPressed: () => _performLogin(fromBiometricCard: true),
                       ),
+                      if (!_isBiometricEnabledForRole)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Enable biometric login in Security settings to use this option.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: muted,
+                            ),
+                          ),
+                        ),
 
                       const SizedBox(height: 14),
                       Row(
@@ -337,11 +486,13 @@ class _SocialButton extends StatelessWidget {
   final Widget leading;
   final String label;
   final VoidCallback onPressed;
+  final bool enabled;
 
   const _SocialButton({
     required this.leading,
     required this.label,
     required this.onPressed,
+    this.enabled = true,
   });
 
   @override
@@ -350,7 +501,7 @@ class _SocialButton extends StatelessWidget {
     return SizedBox(
       height: 52,
       child: OutlinedButton(
-        onPressed: onPressed,
+        onPressed: enabled ? onPressed : null,
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

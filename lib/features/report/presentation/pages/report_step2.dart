@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,63 +139,98 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final photos = ref.watch(reportFormDraftProvider).photos;
 
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(height: 8),
-                ReportProgressBar(currentStep: 2, totalSteps: 6),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            const ReportProgressBar(currentStep: 2, totalSteps: 6),
+            const SizedBox(height: 16),
+            Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Add Photos',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Take or upload photos showing the issue clearly',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE5E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8EEFF),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Add Photos',
+                        child: const Icon(
+                          Icons.photo_camera_outlined,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Evidence Photos',
                           style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Take or upload photos showing the issue clearly',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: Color(0xFFE6EAF2)),
+                  const SizedBox(height: 14),
                   AddPhotoCard(onTap: _onAddPhotoTap),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   if (photos.isEmpty)
                     const EmptyPhotoState()
                   else
@@ -273,38 +306,43 @@ class _ReportStep2State extends ConsumerState<ReportStep2> {
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          settings: const RouteSettings(
-                            name: ReportRouteNames.step3,
-                          ),
-                          builder: (context) => const ReportStep3(),
-                        ),
-                      );
-                    },
-                    child: const Text('Continue'),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Back'),
-                ),
-              ],
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: ReportRouteNames.step3,
+                      ),
+                      builder: (context) => const ReportStep3(),
+                    ),
+                  );
+                },
+                child: const Text('Continue'),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

@@ -17,4 +17,6 @@ class AppRoutes {
 
   static const String dashboard = '/dashboard';
   static const String adminDashboard = '/admin/dashboard';
+  static const String authorityDashboard = '/authority/dashboard';
+  static const String notifications = '/notifications';
 }

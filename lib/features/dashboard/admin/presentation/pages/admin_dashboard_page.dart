@@ -51,11 +51,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
 
     if (user.roleIndex != 1) {
       _redirected = true;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.dashboard,
-        (route) => false,
-      );
+      final target = user.roleIndex == 2
+          ? AppRoutes.authorityDashboard
+          : AppRoutes.dashboard;
+      Navigator.pushNamedAndRemoveUntil(context, target, (route) => false);
     }
   }
 

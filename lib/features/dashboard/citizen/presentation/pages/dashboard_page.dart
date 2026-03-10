@@ -57,6 +57,13 @@ class _CitizenDashboardState extends ConsumerState<CitizenDashboard> {
         AppRoutes.adminDashboard,
         (route) => false,
       );
+    } else if (user.roleIndex == 2) {
+      _redirected = true;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.authorityDashboard,
+        (route) => false,
+      );
     }
   }
 

@@ -69,6 +69,26 @@ class ReportRemoteDatasource {
     }
   }
 
+  Future<IssueReport> getIssueById(String id) async {
+    try {
+      final response = await _apiClient.get('${ApiEndpoints.issueById}$id');
+      final data = _asJsonMap(response.data);
+      final payload =
+          _extractPayloadMap(data) ??
+          (data['data'] is Map
+              ? Map<String, dynamic>.from(data['data'] as Map)
+              : null);
+      if (payload == null) {
+        throw ApiException.fromError('Missing issue payload in response');
+      }
+      return IssueReportApiModel.fromJson(payload).toEntity();
+    } on DioException catch (e) {
+      throw _toApiException(e);
+    } catch (e) {
+      throw ApiException.fromError(e);
+    }
+  }
+
   Future<String> updateIssueStatus({
     required String id,
     required String status,

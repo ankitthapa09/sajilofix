@@ -29,6 +29,7 @@ class IssueReport {
   final String status;
   final String? statusUpdatedByRole;
   final DateTime? statusUpdatedAt;
+  final List<IssueStatusHistoryEntry> statusHistory;
   final IssueLocation location;
   final List<String> photos;
   final DateTime? createdAt;
@@ -43,10 +44,25 @@ class IssueReport {
     required this.status,
     this.statusUpdatedByRole,
     this.statusUpdatedAt,
+    this.statusHistory = const [],
     required this.location,
     required this.photos,
     this.createdAt,
     this.reporter,
+  });
+}
+
+class IssueStatusHistoryEntry {
+  final String status;
+  final String changedByRole;
+  final String? changedByUserId;
+  final DateTime? changedAt;
+
+  const IssueStatusHistoryEntry({
+    required this.status,
+    required this.changedByRole,
+    this.changedByUserId,
+    this.changedAt,
   });
 }
 

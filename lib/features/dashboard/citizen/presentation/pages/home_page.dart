@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/home_widgets.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
@@ -21,6 +23,8 @@ class HomeScreen extends ConsumerWidget {
     );
     final reportsAsync = ref.watch(myReportsProvider);
     final statsAsync = ref.watch(citizenHomeStatsProvider);
+    final unreadAsync = ref.watch(unreadCountProvider);
+    final unreadCount = unreadAsync.valueOrNull ?? 0;
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -40,52 +44,73 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Hero(
                       tag: HeroTags.appLogo,
-                      child: Image.asset(
-                        'assets/images/sajilofix_logo.png',
-                        height: 100,
-                      ),
+                      child: const AppLogoImage(height: 100),
                     ),
                     const Spacer(),
                     // Notification bell
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E2330) : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: isDark
-                            ? []
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.notifications_outlined,
-                            size: 22,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.7,
-                            ),
-                          ),
-                          Positioned(
-                            top: 9,
-                            right: 9,
-                            child: Container(
-                              width: 7,
-                              height: 7,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEF4444),
-                                shape: BoxShape.circle,
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.notifications),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1E2330)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              Icons.notifications_outlined,
+                              size: 22,
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
                               ),
                             ),
-                          ),
-                        ],
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 1,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEF4444),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    unreadCount > 99
+                                        ? '99+'
+                                        : unreadCount.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

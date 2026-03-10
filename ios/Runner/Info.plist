@@ -62,5 +62,7 @@
 	<string>We need your location to help accurately report where the issue is.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location even when the app is not open for features like background updates.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to securely sign in to your SajiloFix account.</string>
 </dict>
 </plist>

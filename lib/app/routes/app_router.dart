@@ -6,11 +6,13 @@ import 'package:sajilofix/features/auth/presentation/pages/forget_password/reset
 import 'package:sajilofix/features/auth/presentation/pages/admin/admin_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/user/user_login_page.dart';
 import 'package:sajilofix/features/auth/presentation/pages/signup_page.dart';
+import 'package:sajilofix/features/dashboard/authority/presentation/pages/authority_dashboard_page.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_dashboard_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/dashboard_page.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page1.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page2.dart';
 import 'package:sajilofix/features/onboarding/presentation/pages/onboarding_page3.dart';
+import 'package:sajilofix/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:sajilofix/features/splash/presentation/splash_page.dart';
 
 class AppRouter {
@@ -64,6 +66,16 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => AdminDashboard(initialIndex: initialIndex),
         );
+
+      case AppRoutes.authorityDashboard:
+        final args = settings.arguments;
+        final initialIndex = (args is int) ? args : 0;
+        return MaterialPageRoute(
+          builder: (_) => AuthorityDashboard(initialIndex: initialIndex),
+        );
+
+      case AppRoutes.notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsPage());
 
       default:
         return MaterialPageRoute(builder: (_) => const SplashScreen());

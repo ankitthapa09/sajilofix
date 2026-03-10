@@ -4,7 +4,11 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
+import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
+import 'package:sajilofix/core/services/storage/app_preferences.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
@@ -45,6 +49,38 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     super.dispose();
   }
 
+  Future<bool> _requireBiometric() async {
+    final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 1);
+    if (!enabled) return true;
+
+    final service = BiometricService();
+    final available = await service.isAvailable();
+    if (!available) {
+      showMySnackBar(
+        context: context,
+        message: 'Biometric is not available on this device.',
+        isError: true,
+      );
+      return true;
+    }
+
+    final ok = await service.authenticate(
+      reason: 'Confirm to finish signing in',
+    );
+    if (!ok) {
+      await ref.read(authRepositoryProvider).logout();
+      ref.invalidate(currentUserProvider);
+      showMySnackBar(
+        context: context,
+        message: 'Biometric authentication failed.',
+        isError: true,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -62,10 +98,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 const SizedBox(height: 10),
                 Hero(
                   tag: HeroTags.appLogo,
-                  child: Image.asset(
-                    'assets/images/sajilofix_logo.png',
-                    height: 120,
-                  ),
+                  child: const AppLogoImage(height: 120),
                 ),
                 const SizedBox(height: 18),
 
@@ -183,6 +216,11 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
                             ref.invalidate(currentUserProvider);
                             ref.invalidate(adminIssuesControllerProvider);
+                            ref.invalidate(unreadCountProvider);
+                            ref.invalidate(notificationsControllerProvider);
+
+                            final biometricOk = await _requireBiometric();
+                            if (!biometricOk) return;
 
                             if (!context.mounted) return;
                             showMySnackBar(

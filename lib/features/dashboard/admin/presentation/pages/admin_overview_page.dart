@@ -4,6 +4,7 @@ import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/pages/admin_user_form_page.dart';
 import 'package:sajilofix/features/dashboard/admin/presentation/providers/admin_users_providers.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
@@ -43,6 +44,8 @@ class _AdminOverviewScreenState extends ConsumerState<AdminOverviewScreen> {
 
     final issuesAsync = ref.watch(adminIssuesControllerProvider);
     final metricsAsync = ref.watch(adminUserMetricsProvider);
+    final unreadAsync = ref.watch(unreadCountProvider);
+    final unreadCount = unreadAsync.valueOrNull ?? 0;
     final issueCounts = _issueCounts(issuesAsync.valueOrNull ?? const []);
     final openIssues = issueCounts.pending + issueCounts.inProgress;
 
@@ -71,6 +74,72 @@ class _AdminOverviewScreenState extends ConsumerState<AdminOverviewScreen> {
                       ),
                     ),
                     const Spacer(),
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.notifications),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1E2330)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              Icons.notifications_outlined,
+                              size: 22,
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 1,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEF4444),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    unreadCount > 99
+                                        ? '99+'
+                                        : unreadCount.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/constants/hero_tags.dart';
+import 'package:sajilofix/core/widgets/app_logo_image.dart';
 import 'package:sajilofix/features/report/domain/entities/issue_report.dart';
 import 'package:sajilofix/features/report/presentation/pages/report_view_page.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
@@ -32,10 +34,7 @@ class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
             children: [
               Hero(
                 tag: HeroTags.appLogo,
-                child: Image.asset(
-                  'assets/images/sajilofix_logo.png',
-                  height: 60,
-                ),
+                child: const AppLogoImage(height: 60),
               ),
               const Spacer(),
               IconButton(
@@ -123,6 +122,17 @@ class _AdminIssuesScreenState extends ConsumerState<AdminIssuesScreen> {
               child: _IssuesMapCard(
                 center: mapData.center,
                 markers: mapData.markers,
+                onOpenFullMap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => _FullScreenIssuesMapPage(
+                        center: mapData.center,
+                        markers: mapData.markers,
+                        title: 'All Issues Map',
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -378,46 +388,109 @@ class _MapData {
 class _IssuesMapCard extends StatelessWidget {
   final LatLng center;
   final List<Marker> markers;
+  final VoidCallback onOpenFullMap;
 
-  const _IssuesMapCard({required this.center, required this.markers});
+  const _IssuesMapCard({
+    required this.center,
+    required this.markers,
+    required this.onOpenFullMap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    return Container(
+    return SizedBox(
       height: 220,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2330) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2330) : Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 14,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter: center,
+                  initialZoom: 12,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                  ),
                 ),
-              ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: 12,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.sajilofix.app',
+                  ),
+                  MarkerLayer(markers: markers),
+                ],
+              ),
             ),
           ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.sajilofix.app',
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Material(
+              color: Colors.white.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: onOpenFullMap,
+                child: const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Icon(Icons.open_in_full_rounded, size: 18),
+                ),
+              ),
             ),
-            MarkerLayer(markers: markers),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FullScreenIssuesMapPage extends StatelessWidget {
+  final LatLng center;
+  final List<Marker> markers;
+  final String title;
+
+  const _FullScreenIssuesMapPage({
+    required this.center,
+    required this.markers,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: FlutterMap(
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 13,
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.all,
+          ),
         ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.sajilofix.app',
+          ),
+          MarkerLayer(markers: markers),
+        ],
       ),
     );
   }
@@ -443,6 +516,10 @@ class _IssueCard extends StatelessWidget {
     final theme = Theme.of(context);
     final statusColor = _statusColor(issue.status);
     final location = _formatLocation(issue.location);
+    final photoUrl = _buildIssuePhotoUrl(
+      ApiEndpoints.baseUrl,
+      issue.photos.isNotEmpty ? issue.photos.first : null,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -466,17 +543,10 @@ class _IssueCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.location_on_outlined,
-                  color: theme.colorScheme.primary,
-                ),
+              _IssueThumbnail(
+                photoUrl: photoUrl,
+                isDark: isDark,
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -522,21 +592,46 @@ class _IssueCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              OutlinedButton.icon(
-                onPressed: onView,
-                icon: const Icon(Icons.visibility_outlined, size: 18),
-                label: const Text('View'),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: onView,
+                      icon: const Icon(Icons.visibility_outlined, size: 16),
+                      label: const Text('View'),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        minimumSize: const Size(0, 34),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    _StatusMenu(value: issue.status, onChanged: onStatusChange),
+                  ],
+                ),
               ),
-              const SizedBox(width: 12),
-              _StatusMenu(value: issue.status, onChanged: onStatusChange),
-              const Spacer(),
+              const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: const Icon(Icons.delete_outline, size: 16),
                 label: const Text('Delete'),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  minimumSize: const Size(0, 34),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ],
@@ -600,6 +695,73 @@ class _IssueCard extends StatelessWidget {
     final weeks = (diff.inDays / 7).floor();
     return '$weeks weeks ago';
   }
+
+  static String? _buildIssuePhotoUrl(String baseUrl, String? path) {
+    final rel = (path ?? '').trim();
+    if (rel.isEmpty) return null;
+    final cleanBase = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final cleanRel = rel.replaceAll(RegExp(r'^/+'), '');
+    if (cleanRel.startsWith('uploads/')) return '$cleanBase/$cleanRel';
+    return '$cleanBase/uploads/$cleanRel';
+  }
+}
+
+class _IssueThumbnail extends StatelessWidget {
+  final String? photoUrl;
+  final bool isDark;
+  final Color color;
+
+  const _IssueThumbnail({
+    required this.photoUrl,
+    required this.isDark,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final url = (photoUrl ?? '').trim();
+    if (url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          url,
+          width: 46,
+          height: 46,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallback(),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _fallback(showLoader: true);
+          },
+        ),
+      );
+    }
+    return _fallback();
+  }
+
+  Widget _fallback({bool showLoader = false}) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: isDark
+            ? color.withValues(alpha: 0.16)
+            : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: showLoader
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            )
+          : Icon(Icons.photo_outlined, color: color),
+    );
+  }
 }
 
 class _StatusMenu extends StatelessWidget {
@@ -627,7 +789,7 @@ class _StatusMenu extends StatelessWidget {
           )
           .toList(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
@@ -637,8 +799,8 @@ class _StatusMenu extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.edit_outlined, size: 16),
-            const SizedBox(width: 6),
+            const Icon(Icons.edit_outlined, size: 15),
+            const SizedBox(width: 5),
             Text(
               _statusLabel(value),
               style: Theme.of(context).textTheme.labelSmall,

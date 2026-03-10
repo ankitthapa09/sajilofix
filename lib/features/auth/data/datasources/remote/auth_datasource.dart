@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:sajilofix/core/api/api_client.dart';
+import 'package:sajilofix/core/api/api_config.dart';
 import 'package:sajilofix/core/api/api_endpoints.dart';
 import 'package:sajilofix/core/api/api_exception.dart';
 import 'package:sajilofix/core/services/storage/user_session_service.dart';
@@ -212,6 +213,15 @@ class AuthRemoteDatasource implements IAuthRemoteDataSource {
     if (status != null) {
       final parsed = data is String ? _tryDecodeJson(data) : data;
       return ApiException.fromResponse(statusCode: status, data: parsed);
+    }
+
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return ApiException.fromError(
+        'Unable to reach server at ${ApiConfig.baseUrl}. For physical device, run with --dart-define=SAJILOFIX_FALLBACK_IP=<your_computer_lan_ip> or --dart-define=SAJILOFIX_API_BASE_URL=http://<your_computer_lan_ip>:4000',
+      );
     }
 
     return ApiException.fromError(e);

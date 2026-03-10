@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/core/widgets/gradiant_elevated_button.dart';
@@ -18,6 +23,114 @@ class ReportStep6 extends ConsumerStatefulWidget {
 
 class _ReportStep6State extends ConsumerState<ReportStep6> {
   bool _isSubmitting = false;
+  StreamSubscription<UserAccelerometerEvent>? _shakeSubscription;
+  DateTime? _lastShakeAt;
+  bool _isShakeDialogOpen = false;
+
+  static const double _shakeThreshold = 16.0;
+  static const Duration _shakeCooldown = Duration(milliseconds: 1200);
+
+  @override
+  void initState() {
+    super.initState();
+    _startShakeListener();
+  }
+
+  @override
+  void dispose() {
+    final subscription = _shakeSubscription;
+    _shakeSubscription = null;
+    if (subscription != null) {
+      unawaited(
+        subscription.cancel().catchError((error) {
+          // Some builds/hot restarts can leave sensors channel unregistered.
+          if (error is MissingPluginException) return;
+        }),
+      );
+    }
+    super.dispose();
+  }
+
+  void _startShakeListener() {
+    try {
+      _shakeSubscription = userAccelerometerEventStream().listen(
+        (event) {
+          if (!mounted || _isSubmitting || _isShakeDialogOpen) return;
+
+          final magnitude = math.sqrt(
+            event.x * event.x + event.y * event.y + event.z * event.z,
+          );
+
+          if (magnitude < _shakeThreshold) return;
+
+          final now = DateTime.now();
+          if (_lastShakeAt != null &&
+              now.difference(_lastShakeAt!) < _shakeCooldown) {
+            return;
+          }
+          _lastShakeAt = now;
+          _onShakeDetected();
+        },
+        onError: (error, _) {
+          if (error is MissingPluginException) {
+            _shakeSubscription = null;
+          }
+        },
+      );
+    } on MissingPluginException {
+      _shakeSubscription = null;
+    }
+  }
+
+  Future<void> _onShakeDetected() async {
+    final draft = ref.read(reportFormDraftProvider);
+    final hasDraftData =
+        (draft.category ?? '').trim().isNotEmpty ||
+        (draft.locationTitle ?? '').trim().isNotEmpty ||
+        (draft.issueTitle ?? '').trim().isNotEmpty ||
+        (draft.issueDescription ?? '').trim().isNotEmpty ||
+        draft.photos.isNotEmpty;
+
+    if (!hasDraftData) return;
+
+    _isShakeDialogOpen = true;
+    final shouldDiscard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Discard report draft?'),
+          content: const Text(
+            'We detected a shake gesture. Do you want to clear this report draft and return to dashboard?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Keep Draft'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Discard'),
+            ),
+          ],
+        );
+      },
+    );
+    _isShakeDialogOpen = false;
+
+    if (shouldDiscard != true || !mounted) return;
+
+    ref.read(reportFormDraftProvider.notifier).reset();
+    showMySnackBar(
+      context: context,
+      message: 'Draft discarded.',
+      icon: Icons.undo,
+    );
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.dashboard,
+      (route) => false,
+      arguments: 0,
+    );
+  }
 
   void _popToNamedOrCount(String routeName, int countFallback) {
     final navigator = Navigator.of(context);
@@ -140,6 +253,7 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
       );
 
       ref.read(reportFormDraftProvider.notifier).reset();
+      ref.invalidate(myReportsProvider);
       Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
         (route) => false,
@@ -167,217 +281,201 @@ class _ReportStep6State extends ConsumerState<ReportStep6> {
     return Scaffold(
       appBar: const ReportAppBar(title: 'Report Issue'),
       backgroundColor: const Color(0xFFF4F6FB),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SizedBox(height: 8),
-                ReportProgressBar(currentStep: 6, totalSteps: 6),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            const ReportProgressBar(currentStep: 6, totalSteps: 6),
+            const SizedBox(height: 16),
+            Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Review & Submit',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Please review your report before submitting',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            _ReviewSection(
+              title: 'Category',
+              onEdit: () => Navigator.of(context).popUntil((r) => r.isFirst),
+              child: Text(
+                (draft.category ?? '').trim().isEmpty
+                    ? 'Not selected'
+                    : draft.category!.trim(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            _ReviewSection(
+              title: 'Location',
+              onEdit: () => _popToNamedOrCount(ReportRouteNames.step3, 3),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Review & Submit',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Please review your report before submitting',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
+                  Text(
+                    (draft.locationTitle ?? '').trim().isEmpty
+                        ? 'Not selected'
+                        : draft.locationTitle!.trim(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 18),
-
-                  _ReviewSection(
-                    title: 'Category',
-                    onEdit: () =>
-                        Navigator.of(context).popUntil((r) => r.isFirst),
-                    child: Text(
-                      (draft.category ?? '').trim().isEmpty
-                          ? 'Not selected'
-                          : draft.category!.trim(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                  if ((draft.locationSubtitle ?? '').trim().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        draft.locationSubtitle!.trim(),
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
+                  if ((draft.district ?? '').trim().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        'District: ${draft.district!.trim()}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  if ((draft.ward ?? '').trim().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        'Ward: ${draft.ward!.trim()}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  if ((draft.landmark ?? '').trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Near: ${draft.landmark!.trim()}',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
 
-                  _ReviewSection(
-                    title: 'Location',
-                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step3, 3),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          (draft.locationTitle ?? '').trim().isEmpty
-                              ? 'Not selected'
-                              : draft.locationTitle!.trim(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if ((draft.locationSubtitle ?? '').trim().isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              draft.locationSubtitle!.trim(),
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        if ((draft.district ?? '').trim().isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              'District: ${draft.district!.trim()}',
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        if ((draft.ward ?? '').trim().isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              'Ward: ${draft.ward!.trim()}',
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        if ((draft.landmark ?? '').trim().isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            'Near: ${draft.landmark!.trim()}',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ],
+            _ReviewSection(
+              title: 'Issue Details',
+              onEdit: () => _popToNamedOrCount(ReportRouteNames.step4, 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    (draft.issueTitle ?? '').trim().isEmpty
+                        ? 'No title'
+                        : draft.issueTitle!.trim(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 8),
+                  Text(
+                    (draft.issueDescription ?? '').trim().isEmpty
+                        ? 'No description'
+                        : draft.issueDescription!.trim(),
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
 
-                  _ReviewSection(
-                    title: 'Issue Details',
-                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step4, 2),
+            _ReviewSection(
+              title: 'Photos',
+              onEdit: () => _popToNamedOrCount(ReportRouteNames.step2, 4),
+              child: Text(
+                draft.photos.isEmpty
+                    ? 'No photos'
+                    : '${draft.photos.length} photo(s) selected',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            _ReviewSection(
+              title: 'Urgency Level',
+              onEdit: () => _popToNamedOrCount(ReportRouteNames.step5, 1),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _UrgencyIcon(urgency: draft.urgency),
+                  const SizedBox(width: 10),
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          (draft.issueTitle ?? '').trim().isEmpty
-                              ? 'No title'
-                              : draft.issueTitle!.trim(),
+                          (draft.urgency ?? '').trim().isEmpty
+                              ? 'Not selected'
+                              : draft.urgency!.trim(),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 2),
                         Text(
-                          (draft.issueDescription ?? '').trim().isEmpty
-                              ? 'No description'
-                              : draft.issueDescription!.trim(),
+                          _urgencySubtitle(draft.urgency),
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
-
-                  _ReviewSection(
-                    title: 'Photos',
-                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step2, 4),
-                    child: Text(
-                      draft.photos.isEmpty
-                          ? 'No photos'
-                          : '${draft.photos.length} photo(s) selected',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  _ReviewSection(
-                    title: 'Urgency Level',
-                    onEdit: () => _popToNamedOrCount(ReportRouteNames.step5, 1),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _UrgencyIcon(urgency: draft.urgency),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                (draft.urgency ?? '').trim().isEmpty
-                                    ? 'Not selected'
-                                    : draft.urgency!.trim(),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _urgencySubtitle(draft.urgency),
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  _GuidelinesNotice(),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: GradientElevatedButton(
+
+            const SizedBox(height: 16),
+
+            _GuidelinesNotice(),
+            const SizedBox(height: 10),
+            const _ShakeHint(),
+            const SizedBox(height: 22),
+            GradientElevatedButton(
               text: 'Submit Report',
               onPressed: () {
                 if (_isSubmitting) return;
                 _submitReport();
               },
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
@@ -525,6 +623,40 @@ class _GuidelinesNotice extends StatelessWidget {
               'By submitting this report, you confirm that the information provided is accurate and you agree to our community guidelines.',
               style: TextStyle(
                 color: Color(0xFF1B4332),
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShakeHint extends StatelessWidget {
+  const _ShakeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF4FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC9D8FF)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.screen_rotation_alt_outlined, color: Color(0xFF3A6ACA)),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Tip: Shake your phone on this page to quickly discard your draft (confirmation required).',
+              style: TextStyle(
+                color: Color(0xFF2E4C95),
                 fontWeight: FontWeight.w600,
                 height: 1.35,
               ),

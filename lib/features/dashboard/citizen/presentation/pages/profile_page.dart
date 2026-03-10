@@ -3,16 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sajilofix/app/theme/theme_mode_controller.dart';
 import 'package:sajilofix/app/routes/app_routes.dart';
 import 'package:sajilofix/common/sajilofix_snackbar.dart';
 import 'package:sajilofix/core/api/api_client.dart';
+import 'package:sajilofix/core/services/biometrics/biometric_service.dart';
 import 'package:sajilofix/core/services/app_permissions.dart';
+import 'package:sajilofix/core/services/storage/app_preferences.dart';
 import 'package:sajilofix/features/auth/domain/entities/auth_user.dart';
 import 'package:sajilofix/features/auth/presentation/providers/auth_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_home_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/providers/citizen_profile_providers.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/pages/profile_edit_page.dart';
 import 'package:sajilofix/features/dashboard/citizen/presentation/widgets/profile_widgets.dart';
+import 'package:sajilofix/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sajilofix/features/report/presentation/providers/report_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -42,11 +46,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
     _animController!.forward();
 
+    _loadSecurityPreferences();
+
     Future.microtask(() async {
       await ref
           .read(citizenProfileControllerProvider.notifier)
           .syncCurrentUser();
     });
+  }
+
+  Future<void> _loadSecurityPreferences() async {
+    final enabled = await AppPreferences.isBiometricEnabled(roleIndex: 0);
+    final autoDark = await AppPreferences.isAutoDarkModeEnabled();
+    if (!mounted) return;
+    setState(() {
+      _biometricLock = enabled;
+      _autoDarkMode = autoDark;
+    });
+  }
+
+  Future<void> _toggleBiometric(bool enabled) async {
+    if (enabled) {
+      final ok = await BiometricService().authenticate(
+        reason: 'Confirm to enable biometric login',
+      );
+      if (!mounted) return;
+      if (!ok) {
+        showMySnackBar(
+          context: context,
+          message: 'Biometric authentication failed',
+          isError: true,
+        );
+        return;
+      }
+    }
+
+    setState(() => _biometricLock = enabled);
+    await AppPreferences.setBiometricEnabled(roleIndex: 0, enabled: enabled);
+  }
+
+  Future<void> _toggleAutoDarkMode(bool enabled) async {
+    setState(() => _autoDarkMode = enabled);
+    await ref.read(appThemeModeProvider.notifier).setAutoDarkMode(enabled);
   }
 
   @override
@@ -70,6 +111,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   bool _shareUsageData = false;
   bool _locationServices = true;
   bool _biometricLock = false;
+  bool _autoDarkMode = false;
   bool _autoLogout = false;
 
   Future<void> _uploadProfilePhoto({
@@ -212,6 +254,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       ref.invalidate(myReportsProvider);
       ref.invalidate(citizenHomeStatsProvider);
       ref.invalidate(adminIssuesControllerProvider);
+      ref.invalidate(unreadCountProvider);
+      ref.invalidate(notificationsControllerProvider);
       ref.read(reportFormDraftProvider.notifier).reset();
       if (!mounted) return;
       Navigator.of(
@@ -248,8 +292,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         .where((p) => p.isNotEmpty)
         .toList();
     if (parts.isEmpty) return 'U';
-    if (parts.length == 1)
+    if (parts.length == 1) {
       return parts.first.characters.take(2).toString().toUpperCase();
+    }
     return (parts.first.characters.first.toString() +
             parts.last.characters.first.toString())
         .toUpperCase();
@@ -370,8 +415,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         return ProfileSecuritySection(
           key: const ValueKey(3),
           biometricLock: _biometricLock,
+          autoDarkMode: _autoDarkMode,
           autoLogout: _autoLogout,
-          onBiometricChanged: (v) => setState(() => _biometricLock = v),
+          onBiometricChanged: _toggleBiometric,
+          onAutoDarkModeChanged: _toggleAutoDarkMode,
           onAutoLogoutChanged: (v) => setState(() => _autoLogout = v),
           onChangePassword: () => showMySnackBar(
             context: context,
